@@ -129,39 +129,59 @@
   .skeleton { background: linear-gradient(90deg, var(--surface) 25%, var(--border) 50%, var(--surface) 75%); background-size: 200% 100%; animation: shimmer 1.4s infinite; border-radius: 6px; height: 1rem; display: block; }
   @keyframes shimmer { 0% { background-position: 200% 0; } 100% { background-position: -200% 0; } }
 
-  /* ── ACCORDION ── */
-  .accordion { display: flex; flex-direction: column; gap: 0.5rem; margin-bottom: 2.5rem; }
+  /* ── NESTED ACCORDION ── */
+  .acc-year { margin-bottom: 0.75rem; }
 
-  .acc-item { background: var(--surface); border: 1px solid var(--border); border-radius: 12px; overflow: hidden; transition: border-color 0.2s; }
-  .acc-item:hover { border-color: rgba(255,60,60,0.3); }
-
-  .acc-header {
+  .acc-year-header {
     display: flex; align-items: center; justify-content: space-between;
-    padding: 0.85rem 1.1rem; cursor: pointer; user-select: none;
-    gap: 1rem;
+    padding: 0.75rem 1.1rem; cursor: pointer; user-select: none;
+    background: rgba(255,60,60,0.06); border: 1px solid var(--border);
+    border-radius: 12px; font-family: 'Bebas Neue', sans-serif;
+    font-size: 1.4rem; letter-spacing: 0.05em; color: var(--text);
+    transition: border-color 0.2s;
   }
+  .acc-year-header:hover { border-color: var(--accent); }
+  .acc-year.open .acc-year-header { border-radius: 12px 12px 0 0; border-bottom-color: transparent; }
 
+  .acc-year-body { display: none; border: 1px solid var(--border); border-top: none; border-radius: 0 0 12px 12px; padding: 0.75rem; background: var(--bg); }
+  .acc-year.open .acc-year-body { display: block; }
+
+  .acc-month { margin-bottom: 0.5rem; }
+  .acc-month:last-child { margin-bottom: 0; }
+
+  .acc-month-header {
+    display: flex; align-items: center; justify-content: space-between;
+    padding: 0.6rem 0.9rem; cursor: pointer; user-select: none;
+    background: var(--surface); border: 1px solid var(--border);
+    border-radius: 8px; font-family: 'DM Mono', monospace;
+    font-size: 0.78rem; text-transform: uppercase; letter-spacing: 0.1em;
+    color: var(--muted); transition: border-color 0.2s, color 0.2s;
+  }
+  .acc-month-header:hover { border-color: var(--accent); color: var(--text); }
+  .acc-month.open .acc-month-header { border-radius: 8px 8px 0 0; border-bottom-color: transparent; color: var(--text); }
+
+  .acc-month-body { display: none; border: 1px solid var(--border); border-top: none; border-radius: 0 0 8px 8px; overflow: hidden; }
+  .acc-month.open .acc-month-body { display: block; }
+
+  .acc-chevron { font-size: 0.6rem; color: var(--muted); transition: transform 0.25s; flex-shrink: 0; }
+  .acc-year.open .acc-year-header .acc-chevron,
+  .acc-month.open .acc-month-header .acc-chevron { transform: rotate(180deg); }
+
+  .acc-item { background: var(--surface); border-bottom: 1px solid var(--border); overflow: hidden; transition: background 0.15s; }
+  .acc-item:last-child { border-bottom: none; }
+  .acc-item:hover { background: rgba(255,255,255,0.02); }
+
+  .acc-header { display: flex; align-items: center; justify-content: space-between; padding: 0.7rem 1rem; cursor: pointer; user-select: none; gap: 1rem; }
   .acc-header-left { display: flex; align-items: center; gap: 0.75rem; }
   .acc-header-right { display: flex; align-items: center; gap: 0.75rem; }
 
-  .acc-winner {
-    display: flex; align-items: center; gap: 0.4rem;
-    font-family: 'DM Mono', monospace; font-size: 0.78rem;
-  }
+  .acc-winner { display: flex; align-items: center; gap: 0.4rem; font-family: 'DM Mono', monospace; font-size: 0.78rem; }
   .acc-winner-name { color: var(--green); font-weight: 600; }
   .acc-winner-score { color: var(--green); font-weight: 700; }
 
-  .acc-chevron {
-    font-size: 0.65rem; color: var(--muted);
-    transition: transform 0.25s;
-    flex-shrink: 0;
-  }
-  .acc-item.open .acc-chevron { transform: rotate(180deg); }
-
   .acc-body { display: none; border-top: 1px solid var(--border); }
   .acc-item.open .acc-body { display: block; }
-
-  .acc-table { width: 100%; border-collapse: collapse; font-size: 0.8rem; }
+  .acc-item.open .acc-header .acc-chevron { transform: rotate(180deg); }
   .acc-table th {
     padding: 0.55rem 1rem; text-align: left;
     font-family: 'DM Mono', monospace; font-size: 0.65rem;
@@ -219,7 +239,7 @@
   </div>
 
   <!-- ROUND STATS -->
-  <div class="section-title" style="margin-top:0.5rem">📊 Round Averages</div>
+  <div class="section-title" style="margin-top:0.5rem">📊 Averages</div>
   <div class="round-stats-grid" id="roundAvgs"></div>
 
   <div class="section-title" style="margin-top:0.5rem">🎯 Perfect 100s</div>
@@ -239,6 +259,7 @@ const SHEET_NAME = 'Sheet1';
 
 const PLAYERS = ['Jura', 'Adam', 'Berta', 'Andrew'];
 const AUTO_REFRESH_MS = 60000;
+let allRows = [];
 
 // ── HELPERS ─────────────────────────────────
 function hasScore(s) { return s !== null && s !== undefined && s !== '' && !isNaN(Number(s)) && Number(s) > 0; }
@@ -359,6 +380,7 @@ function render(rows) {
       const medal = ['🥇','🥈','🥉',''][rank];
       const big   = key === 'wins' ? p.wins : p.totalFinal.toLocaleString();
       const label = key === 'wins' ? 'Daily wins' : 'Total pts';
+      const winRate = p.gamesPlayed > 0 ? Math.round((p.wins / p.gamesPlayed) * 100) : 0;
       return `<div class="player-card rank-${rank+1}">
         <div class="rank-badge">${rank+1}</div>
         <div class="player-name">${medal} ${p.player}</div>
@@ -369,6 +391,10 @@ function render(rows) {
             <span class="stat-label">Games played</span>
             <span class="stat-value">${p.gamesPlayed}</span>
           </div>
+          ${key === 'wins' ? `<div class="stat-row">
+            <span class="stat-label">Win rate</span>
+            <span class="stat-value">${winRate}%</span>
+          </div>` : ''}
         </div>
       </div>`;
     }).join('');
@@ -407,8 +433,9 @@ function render(rows) {
       <div class="rank-badge">${rank+1}</div>
       <div class="round-card-name">${medal} ${p.player}</div>
       ${overallAvg !== null ? `
+        <div class="stat-row" style="margin-bottom:0.25rem"><span class="stat-label">Total point average</span></div>
         <span class="stat-value big">${overallAvg}</span>
-        <div class="stat-row" style="margin-bottom:0.75rem"><span class="stat-label">Point Average</span></div>
+        <div class="stat-row" style="margin-bottom:0.5rem;margin-top:0.5rem"><span class="stat-label">Round point average</span></div>
       ` : ''}
       ${roundRows}
     </div>`;
@@ -423,19 +450,26 @@ function render(rows) {
       <div class="player-name">${medal} ${p.player}</div>
       <div class="player-stats">
         <span class="stat-value big" style="color:var(--accent)">${p.totalPerfects}</span>
-        <div class="stat-row"><span class="stat-label">Perfect 100s</span></div>
       </div>
     </div>`;
   }).join('');
 
-  // Accordion by date
+  // Build nested year → month → day accordion
+  allRows = rows;
+  renderAccordion(rows);
+}
+
+function renderAccordion(rows) {
   const accordion = document.getElementById('accordion');
+  accordion.className = 'accordion';
   if (!rows.length) { accordion.innerHTML = '<div class="empty">No data yet.</div>'; return; }
 
-  const dates = [...new Set(rows.map(r => r.date))];
-  const dateWinners = {};
-  const dateWinnerNames = {};
-  dates.forEach(date => {
+  const MONTH_NAMES = ['January','February','March','April','May','June','July','August','September','October','November','December'];
+
+  // Compute all date winners upfront
+  const dateWinners = {}, dateWinnerNames = {};
+  const allDates = [...new Set(rows.map(r => r.date))];
+  allDates.forEach(date => {
     const day = rows.filter(r => r.date === date && hasScore(r.final));
     if (!day.length) return;
     const max = Math.max(...day.map(r => r.final));
@@ -443,56 +477,94 @@ function render(rows) {
     dateWinnerNames[date] = day.find(r => r.final === max)?.player;
   });
 
-  accordion.className = 'accordion';
-  accordion.innerHTML = dates.map((date, di) => {
-    const dayRows = rows.filter(r => r.date === date);
-    const winnerName = dateWinnerNames[date];
-    const winnerScore = dateWinners[date];
-    const isFirstOpen = di === 0;
+  // Group: year → month → dates
+  const tree = {};
+  rows.forEach(r => {
+    const [d, m, y] = r.date.split('/');
+    const year = `20${y}`, month = m;
+    if (!tree[year]) tree[year] = {};
+    if (!tree[year][month]) tree[year][month] = new Set();
+    tree[year][month].add(r.date);
+  });
 
-    const playerRows = dayRows.map(r => {
-      const isWinner = hasScore(r.final) && r.final === dateWinners[r.date];
-      const finalCell = !hasScore(r.final)
-        ? `<td class="score-miss">—</td>`
-        : isWinner ? `<td class="score-win">${r.final}</td>`
-        : `<td>${r.final}</td>`;
+  const years = Object.keys(tree).sort((a,b) => b - a);
+  const mostRecentYear = years[0];
+  const mostRecentMonth = Object.keys(tree[mostRecentYear]).sort().pop();
 
-      const roundCells = r.rounds.map(v =>
-        v === 100 ? `<td class="score-perfect">100</td>`
-        : hasScore(v) ? `<td>${v}</td>`
-        : `<td class="score-miss">—</td>`
-      ).join('');
+  accordion.innerHTML = years.map(year => {
+    const months = Object.keys(tree[year]).sort((a,b) => b - a);
+    const isYearOpen = year === mostRecentYear;
 
-      return `<tr>
-        <td class="player-cell">${isWinner ? '🥇 ' : ''}${r.player}</td>
-        ${roundCells}
-        ${finalCell}
-      </tr>`;
-    }).join('');
+    const monthsHTML = months.map(month => {
+      const isMonthOpen = year === mostRecentYear && month === mostRecentMonth;
+      const dates = [...tree[year][month]].sort((a,b) => {
+        const pa = a.split('/').reverse().join('');
+        const pb = b.split('/').reverse().join('');
+        return pb.localeCompare(pa);
+      });
 
-    return `<div class="acc-item${isFirstOpen ? ' open' : ''}" onclick="this.classList.toggle('open')">
-      <div class="acc-header">
-        <div class="acc-header-left">
-          <span class="date-cell"><span class="day-label">${getDayOfWeek(date)}</span>${date}</span>
-        </div>
-        <div class="acc-header-right">
-          ${winnerName ? `<span class="acc-winner">
-            <span class="acc-winner-name">🥇 ${winnerName}</span>
-            <span class="acc-winner-score">${winnerScore}</span>
-          </span>` : ''}
+      const daysHTML = dates.map((date, di) => {
+        const dayRows = rows.filter(r => r.date === date);
+        const winnerName = dateWinnerNames[date];
+        const winnerScore = dateWinners[date];
+
+        const playerRows = dayRows.map(r => {
+          const isWinner = hasScore(r.final) && r.final === dateWinners[r.date];
+          const finalCell = !hasScore(r.final) ? `<td class="score-miss">—</td>`
+            : isWinner ? `<td class="score-win">${r.final}</td>`
+            : `<td>${r.final}</td>`;
+          const roundCells = r.rounds.map(v =>
+            v === 100 ? `<td class="score-perfect">100</td>`
+            : hasScore(v) ? `<td>${v}</td>`
+            : `<td class="score-miss">—</td>`
+          ).join('');
+          return `<tr>
+            <td class="player-cell">${isWinner ? '🥇 ' : ''}${r.player}</td>
+            ${roundCells}${finalCell}
+          </tr>`;
+        }).join('');
+
+        return `<div class="acc-item" onclick="this.classList.toggle('open')">
+          <div class="acc-header">
+            <div class="acc-header-left">
+              <span class="date-cell"><span class="day-label">${getDayOfWeek(date)}</span>${date}</span>
+            </div>
+            <div class="acc-header-right">
+              ${winnerName ? `<span class="acc-winner">
+                <span class="acc-winner-name">🥇 ${winnerName}</span>
+                <span class="acc-winner-score">${winnerScore}</span>
+              </span>` : ''}
+              <span class="acc-chevron">▼</span>
+            </div>
+          </div>
+          <div class="acc-body">
+            <table class="acc-table">
+              <thead><tr>
+                <th>Player</th>
+                <th>R1</th><th>R2</th><th>R3</th><th>R4</th><th>R5</th>
+                <th>Final</th>
+              </tr></thead>
+              <tbody>${playerRows}</tbody>
+            </table>
+          </div>
+        </div>`;
+      }).join('');
+
+      return `<div class="acc-month${isMonthOpen ? ' open' : ''}">
+        <div class="acc-month-header" onclick="this.parentElement.classList.toggle('open')">
+          <span>${MONTH_NAMES[parseInt(month)-1]} · ${dates.length} day${dates.length > 1 ? 's' : ''}</span>
           <span class="acc-chevron">▼</span>
         </div>
+        <div class="acc-month-body">${daysHTML}</div>
+      </div>`;
+    }).join('');
+
+    return `<div class="acc-year${isYearOpen ? ' open' : ''}">
+      <div class="acc-year-header" onclick="this.parentElement.classList.toggle('open')">
+        <span>${year}</span>
+        <span class="acc-chevron">▼</span>
       </div>
-      <div class="acc-body">
-        <table class="acc-table">
-          <thead><tr>
-            <th>Player</th>
-            <th>R1</th><th>R2</th><th>R3</th><th>R4</th><th>R5</th>
-            <th>Final</th>
-          </tr></thead>
-          <tbody>${playerRows}</tbody>
-        </table>
-      </div>
+      <div class="acc-year-body">${monthsHTML}</div>
     </div>`;
   }).join('');
 }
