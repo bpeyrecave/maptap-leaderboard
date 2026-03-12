@@ -8,7 +8,532 @@
 <style>
   :root {
     --bg: #0a0a0f;
+    --su<!DOCTYPE html>
+<html lang="en">
+<head>
+<meta charset="UTF-8">
+<meta name="viewport" content="width=device-width, initial-scale=1.0">
+<title>MapTap Leaderboard</title>
+<link href="https://fonts.googleapis.com/css2?family=Bebas+Neue&family=DM+Mono:wght@400;500&family=Space+Grotesk:wght@400;600;700&display=swap" rel="stylesheet">
+<style>
+  :root {
+    --bg: #0a0a0f;
     --surface: #13131a;
+    --border: #1e1e2e;
+    --accent: #ff3c3c;
+    --gold: #ffd700;
+    --silver: #c0c0c0;
+    --bronze: #cd7f32;
+    --text: #e8e8f0;
+    --muted: #5a5a7a;
+    --green: #00ff88;
+  }
+
+  * { margin: 0; padding: 0; box-sizing: border-box; }
+
+  body {
+    background: var(--bg);
+    color: var(--text);
+    font-family: 'Space Grotesk', sans-serif;
+    min-height: 100vh;
+    padding: 2rem 1rem;
+    background-image:
+      radial-gradient(ellipse 80% 40% at 50% -10%, rgba(255,60,60,0.12) 0%, transparent 60%),
+      repeating-linear-gradient(0deg, transparent, transparent 39px, rgba(255,255,255,0.015) 39px, rgba(255,255,255,0.015) 40px),
+      repeating-linear-gradient(90deg, transparent, transparent 39px, rgba(255,255,255,0.015) 39px, rgba(255,255,255,0.015) 40px);
+  }
+
+  .container { max-width: 960px; margin: 0 auto; }
+
+  header {
+    display: flex;
+    align-items: center;
+    justify-content: space-between;
+    margin-bottom: 2.5rem;
+    border-bottom: 1px solid var(--border);
+    padding-bottom: 1.5rem;
+    flex-wrap: wrap;
+    gap: 1rem;
+  }
+
+  .logo { font-family: 'Bebas Neue', sans-serif; font-size: 3.5rem; letter-spacing: 0.04em; color: var(--text); line-height: 1; }
+  .logo span { color: var(--accent); }
+  .subtitle { font-family: 'DM Mono', monospace; font-size: 0.75rem; color: var(--muted); text-transform: uppercase; letter-spacing: 0.12em; margin-top: 0.25rem; }
+
+  .header-right { display: flex; align-items: center; gap: 0.75rem; }
+
+  .status-pill { display: flex; align-items: center; gap: 0.4rem; font-family: 'DM Mono', monospace; font-size: 0.7rem; color: var(--muted); background: var(--surface); border: 1px solid var(--border); border-radius: 20px; padding: 0.35rem 0.75rem; }
+  .status-dot { width: 6px; height: 6px; border-radius: 50%; background: var(--muted); transition: background 0.3s; }
+  .status-dot.live { background: var(--green); box-shadow: 0 0 6px var(--green); }
+  .status-dot.error { background: var(--accent); }
+
+  .refresh-btn { background: transparent; border: 1px solid var(--border); color: var(--muted); border-radius: 8px; padding: 0.4rem 0.9rem; font-family: 'DM Mono', monospace; font-size: 0.72rem; cursor: pointer; transition: all 0.2s; letter-spacing: 0.05em; }
+  .refresh-btn:hover { border-color: var(--accent); color: var(--accent); }
+  .refresh-btn.spinning { opacity: 0.5; pointer-events: none; }
+
+  .last-updated { font-family: 'DM Mono', monospace; font-size: 0.65rem; color: var(--muted); text-align: right; margin-bottom: 2rem; margin-top: -1.5rem; }
+
+  .section-title { font-family: 'DM Mono', monospace; font-size: 0.7rem; text-transform: uppercase; letter-spacing: 0.15em; color: var(--muted); margin-bottom: 0.75rem; }
+
+  /* ── STANDINGS CARDS ── */
+  .leaderboard { display: grid; grid-template-columns: repeat(auto-fit, minmax(200px, 1fr)); gap: 0.75rem; margin-bottom: 2.5rem; }
+
+  .player-card { background: var(--surface); border: 1px solid var(--border); border-radius: 12px; padding: 1.25rem 1rem 1rem; position: relative; overflow: hidden; transition: transform 0.2s, border-color 0.2s; }
+  .player-card:hover { transform: translateY(-2px); border-color: var(--accent); }
+  .player-card.rank-1 { border-color: var(--gold); }
+  .player-card.rank-1::before, .round-card.rank-1::before { content: ''; position: absolute; top: 0; left: 0; right: 0; height: 2px; background: linear-gradient(90deg, transparent, var(--gold), transparent); }
+
+  .rank-badge { position: absolute; top: 0.75rem; right: 0.75rem; font-family: 'Bebas Neue', sans-serif; font-size: 1.8rem; line-height: 1; opacity: 0.15; }
+  .rank-1 .rank-badge { color: var(--gold); opacity: 0.5; }
+  .rank-2 .rank-badge { color: var(--silver); opacity: 0.4; }
+  .rank-3 .rank-badge { color: var(--bronze); opacity: 0.4; }
+
+  .player-name { font-size: 1.1rem; font-weight: 700; margin-bottom: 0.5rem; }
+  .player-stats { display: flex; flex-direction: column; gap: 0.2rem; }
+  .stat-row { display: flex; justify-content: space-between; align-items: center; font-family: 'DM Mono', monospace; font-size: 0.75rem; }
+  .stat-label { color: var(--muted); }
+  .stat-value { font-weight: 500; font-size: 0.85rem; }
+  .stat-value.big { font-family: 'Bebas Neue', sans-serif; font-size: 2rem; color: var(--accent); line-height: 1; display: block; margin: 0.25rem 0; }
+
+  /* ── ROUND STATS ── */
+  .round-stats-grid { display: grid; grid-template-columns: repeat(auto-fit, minmax(200px, 1fr)); gap: 0.75rem; margin-bottom: 2.5rem; }
+
+  .round-card { background: var(--surface); border: 1px solid var(--border); border-radius: 12px; padding: 1.1rem 1rem; transition: transform 0.2s, border-color 0.2s; }
+  .round-card:hover { transform: translateY(-2px); border-color: var(--accent); }
+  .round-card.rank-1 { border-color: var(--gold); }
+  .round-card-name { font-size: 0.95rem; font-weight: 700; margin-bottom: 0.75rem; }
+
+  .round-row { display: flex; align-items: center; gap: 0.5rem; margin-bottom: 0.4rem; font-family: 'DM Mono', monospace; font-size: 0.72rem; }
+  .round-label { color: var(--muted); width: 2rem; flex-shrink: 0; }
+  .round-bar-wrap { flex: 1; height: 6px; background: var(--border); border-radius: 3px; overflow: hidden; }
+  .round-bar { height: 100%; border-radius: 3px; background: var(--accent); transition: width 0.6s ease; }
+  .round-val { color: var(--text); width: 2.5rem; text-align: right; flex-shrink: 0; }
+  .perfect-count { margin-left: auto; color: var(--gold); font-size: 0.68rem; }
+
+  /* ── TABLE ── */
+  .table-wrap { background: var(--surface); border: 1px solid var(--border); border-radius: 12px; overflow: hidden; margin-bottom: 2.5rem; }
+
+  table { width: 100%; border-collapse: collapse; font-size: 0.85rem; }
+  thead tr { background: rgba(255,60,60,0.06); border-bottom: 1px solid var(--border); }
+  th { padding: 0.75rem 1rem; text-align: left; font-family: 'DM Mono', monospace; font-size: 0.68rem; text-transform: uppercase; letter-spacing: 0.1em; color: var(--muted); font-weight: 500; }
+  th:not(:first-child):not(:nth-child(2)) { text-align: center; }
+
+  tbody tr { border-bottom: 1px solid var(--border); transition: background 0.15s; }
+  tbody tr:last-child { border-bottom: none; }
+  tbody tr:hover { background: rgba(255,255,255,0.02); }
+
+  td { padding: 0.55rem 1rem; font-family: 'DM Mono', monospace; font-size: 0.78rem; }
+  td:not(:first-child):not(:nth-child(2)) { text-align: center; }
+
+  .date-cell { color: var(--muted); font-size: 0.72rem; white-space: nowrap; }
+  .day-label { display: inline-block; background: rgba(255,60,60,0.12); color: var(--accent); border-radius: 4px; padding: 0.1rem 0.35rem; font-size: 0.62rem; font-weight: 500; letter-spacing: 0.05em; margin-right: 0.3rem; }
+  .player-cell { font-weight: 600; font-size: 0.8rem; }
+
+  .score-win { color: var(--green); font-weight: 600; }
+  .score-win::after { content: ' 👑'; font-size: 0.65rem; }
+  .score-miss { color: var(--muted); }
+  .score-perfect { color: var(--gold); font-weight: 700; }
+
+  .rounds-mini { font-size: 0.65rem; color: var(--muted); letter-spacing: 0.02em; }
+
+  .skeleton { background: linear-gradient(90deg, var(--surface) 25%, var(--border) 50%, var(--surface) 75%); background-size: 200% 100%; animation: shimmer 1.4s infinite; border-radius: 6px; height: 1rem; display: block; }
+  @keyframes shimmer { 0% { background-position: 200% 0; } 100% { background-position: -200% 0; } }
+
+  /* ── ACCORDION ── */
+  .accordion { display: flex; flex-direction: column; gap: 0.5rem; margin-bottom: 2.5rem; }
+
+  .acc-item { background: var(--surface); border: 1px solid var(--border); border-radius: 12px; overflow: hidden; transition: border-color 0.2s; }
+  .acc-item:hover { border-color: rgba(255,60,60,0.3); }
+
+  .acc-header {
+    display: flex; align-items: center; justify-content: space-between;
+    padding: 0.85rem 1.1rem; cursor: pointer; user-select: none;
+    gap: 1rem;
+  }
+
+  .acc-header-left { display: flex; align-items: center; gap: 0.75rem; }
+  .acc-header-right { display: flex; align-items: center; gap: 0.75rem; }
+
+  .acc-winner {
+    display: flex; align-items: center; gap: 0.4rem;
+    font-family: 'DM Mono', monospace; font-size: 0.78rem;
+  }
+  .acc-winner-name { color: var(--green); font-weight: 600; }
+  .acc-winner-score { color: var(--green); font-weight: 700; }
+
+  .acc-chevron {
+    font-size: 0.65rem; color: var(--muted);
+    transition: transform 0.25s;
+    flex-shrink: 0;
+  }
+  .acc-item.open .acc-chevron { transform: rotate(180deg); }
+
+  .acc-body { display: none; border-top: 1px solid var(--border); }
+  .acc-item.open .acc-body { display: block; }
+
+  .acc-table { width: 100%; border-collapse: collapse; font-size: 0.8rem; }
+  .acc-table th {
+    padding: 0.55rem 1rem; text-align: left;
+    font-family: 'DM Mono', monospace; font-size: 0.65rem;
+    text-transform: uppercase; letter-spacing: 0.1em;
+    color: var(--muted); font-weight: 500;
+    background: rgba(255,60,60,0.04);
+    border-bottom: 1px solid var(--border);
+  }
+  .acc-table th:not(:first-child) { text-align: center; }
+  .acc-table td { padding: 0.55rem 1rem; font-family: 'DM Mono', monospace; font-size: 0.78rem; border-bottom: 1px solid var(--border); }
+  .acc-table td:not(:first-child) { text-align: center; }
+  .acc-table tr:last-child td { border-bottom: none; }
+
+  .empty { text-align: center; padding: 2rem; color: var(--muted); font-family: 'DM Mono', monospace; font-size: 0.8rem; }
+
+  .tabs { display: flex; gap: 0.5rem; margin-bottom: 0.75rem; }
+  .tab { font-family: 'DM Mono', monospace; font-size: 0.7rem; text-transform: uppercase; letter-spacing: 0.1em; padding: 0.35rem 0.75rem; border-radius: 6px; border: 1px solid var(--border); color: var(--muted); cursor: pointer; background: transparent; transition: all 0.2s; }
+  .tab.active { background: rgba(255,60,60,0.1); border-color: var(--accent); color: var(--accent); }
+</style>
+</head>
+<body>
+<div class="container">
+
+  <header>
+    <div>
+      <div class="logo">MAP<span>TAP</span></div>
+      <div class="subtitle">Group Leaderboard · 2026</div>
+    </div>
+    <div class="header-right">
+      <button class="refresh-btn" onclick="loadData(true)" id="refreshBtn">↻ Refresh</button>
+      <div class="status-pill">
+        <div class="status-dot" id="statusDot"></div>
+        <span id="statusText">Loading…</span>
+      </div>
+    </div>
+  </header>
+
+  <div class="last-updated" id="lastUpdated"></div>
+
+  <!-- STANDINGS -->
+  <div class="section-title">🏆 Standings by Points</div>
+  <div class="leaderboard" id="leaderboardPoints">
+    <div class="player-card"><span class="skeleton" style="width:60%;margin-bottom:0.75rem"></span><span class="skeleton" style="width:40%;height:2rem"></span></div>
+    <div class="player-card"><span class="skeleton" style="width:60%;margin-bottom:0.75rem"></span><span class="skeleton" style="width:40%;height:2rem"></span></div>
+    <div class="player-card"><span class="skeleton" style="width:60%;margin-bottom:0.75rem"></span><span class="skeleton" style="width:40%;height:2rem"></span></div>
+    <div class="player-card"><span class="skeleton" style="width:60%;margin-bottom:0.75rem"></span><span class="skeleton" style="width:40%;height:2rem"></span></div>
+  </div>
+
+  <div class="section-title" style="margin-top:0.5rem">👑 Standings by Daily Wins</div>
+  <div class="leaderboard" id="leaderboardWins">
+    <div class="player-card"><span class="skeleton" style="width:60%;margin-bottom:0.75rem"></span><span class="skeleton" style="width:40%;height:2rem"></span></div>
+    <div class="player-card"><span class="skeleton" style="width:60%;margin-bottom:0.75rem"></span><span class="skeleton" style="width:40%;height:2rem"></span></div>
+    <div class="player-card"><span class="skeleton" style="width:60%;margin-bottom:0.75rem"></span><span class="skeleton" style="width:40%;height:2rem"></span></div>
+    <div class="player-card"><span class="skeleton" style="width:60%;margin-bottom:0.75rem"></span><span class="skeleton" style="width:40%;height:2rem"></span></div>
+  </div>
+
+  <!-- ROUND STATS -->
+  <div class="section-title" style="margin-top:0.5rem">📊 Round Averages</div>
+  <div class="round-stats-grid" id="roundAvgs"></div>
+
+  <div class="section-title" style="margin-top:0.5rem">🎯 Perfect 100s</div>
+  <div class="round-stats-grid" id="roundPerfects"></div>
+
+  <!-- DAILY TABLE -->
+  <div class="section-title">📅 Results by Date</div>
+  <div id="accordion"></div>
+
+</div>
+
+<script>
+// ═══════════════════════════════════════════
+const SHEET_ID   = '1YOh6ah35-qDKM3p5CnT7jbeyMIY637-WDXF0_xVPKE4';
+const SHEET_NAME = 'Sheet1';
+// ═══════════════════════════════════════════
+
+const PLAYERS = ['Jura', 'Adam', 'Berta', 'Andrew'];
+const AUTO_REFRESH_MS = 60000;
+
+// ── HELPERS ─────────────────────────────────
+function hasScore(s) { return s !== null && s !== undefined && s !== '' && !isNaN(Number(s)) && Number(s) > 0; }
+function n(s) { return Number(s); }
+
+function getDayOfWeek(dateStr) {
+  const [d, m, y] = dateStr.split('/');
+  return ['Sun','Mon','Tue','Wed','Thu','Fri','Sat'][new Date(`20${y}-${m}-${d}`).getDay()];
+}
+
+function setStatus(state, text) {
+  document.getElementById('statusDot').className = 'status-dot ' + state;
+  document.getElementById('statusText').textContent = text;
+}
+
+function avg(arr) {
+  const valid = arr.filter(x => hasScore(x)).map(n);
+  return valid.length ? (valid.reduce((a,b) => a+b, 0) / valid.length) : null;
+}
+
+// ── FETCH ────────────────────────────────────
+async function fetchSheetData() {
+  const csvUrl = `https://docs.google.com/spreadsheets/d/${SHEET_ID}/export?format=csv&sheet=${encodeURIComponent(SHEET_NAME)}`;
+  const proxies = [
+    u => `https://corsproxy.io/?${encodeURIComponent(u)}`,
+    u => `https://api.codetabs.com/v1/proxy?quest=${encodeURIComponent(u)}`,
+    u => `https://api.allorigins.win/get?url=${encodeURIComponent(u)}`,
+  ];
+
+  let lastErr;
+  for (const makeProxy of proxies) {
+    try {
+      const res = await fetch(makeProxy(csvUrl), { signal: AbortSignal.timeout(8000) });
+      if (!res.ok) throw new Error(`HTTP ${res.status}`);
+      const text = res.headers.get('content-type')?.includes('json')
+        ? (await res.json()).contents
+        : await res.text();
+      if (!text || text.includes('<!DOCTYPE')) throw new Error('Sheet not public');
+      return parseCSV(text);
+    } catch(e) { lastErr = e; console.warn('Proxy failed:', e.message); }
+  }
+  throw lastErr;
+}
+
+// ── PARSE CSV ────────────────────────────────
+// Expected columns: Date, Player, R1, R2, R3, R4, R5, Final
+function parseCSV(text) {
+  const lines = text.trim().split('\n').map(l => {
+    const cols = []; let cur = '', inQ = false;
+    for (let i = 0; i < l.length; i++) {
+      if (l[i] === '"') { inQ = !inQ; }
+      else if (l[i] === ',' && !inQ) { cols.push(cur.trim()); cur = ''; }
+      else { cur += l[i]; }
+    }
+    cols.push(cur.trim());
+    return cols;
+  });
+
+  return lines.slice(1)
+    .filter(r => r[0] && r[1])
+    .map(r => ({
+      date:   r[0],
+      player: r[1],
+      rounds: [r[2], r[3], r[4], r[5], r[6]].map(v => (v && v !== '') ? Number(v) : null),
+      final:  (r[7] && r[7] !== '') ? Number(r[7]) : null,
+    }))
+    .sort((a, b) => {
+      const pa = a.date.split('/').reverse().join('');
+      const pb = b.date.split('/').reverse().join('');
+      return pb.localeCompare(pa) || a.player.localeCompare(b.player);
+    });
+}
+
+// ── COMPUTE STATS ────────────────────────────
+function computeStats(rows) {
+  return PLAYERS.map(player => {
+    const pRows = rows.filter(r => r.player === player && hasScore(r.final));
+
+    const totalFinal = pRows.reduce((s, r) => s + r.final, 0);
+    const gamesPlayed = pRows.length;
+
+    // Daily wins — compare finals on same date
+    const dates = [...new Set(rows.map(r => r.date))];
+    let wins = 0;
+    dates.forEach(date => {
+      const day = rows.filter(r => r.date === date && hasScore(r.final));
+      if (!day.length) return;
+      const max = Math.max(...day.map(r => r.final));
+      if (day.find(r => r.player === player && r.final === max)) wins++;
+    });
+
+    // Round averages (only rows that have round data)
+    const roundAvgs = [0,1,2,3,4].map(i => {
+      const vals = pRows.map(r => r.rounds[i]).filter(v => hasScore(v));
+      return vals.length ? Math.round(vals.reduce((a,b) => a+b,0) / vals.length) : null;
+    });
+
+    // Perfect 100s per round
+    const perfectCounts = [0,1,2,3,4].map(i =>
+      pRows.filter(r => r.rounds[i] === 100).length
+    );
+    const totalPerfects = perfectCounts.reduce((a,b) => a+b, 0);
+
+    return { player, totalFinal, gamesPlayed, wins, roundAvgs, perfectCounts, totalPerfects };
+  });
+}
+
+// ── RENDER ───────────────────────────────────
+function render(rows) {
+  const stats = computeStats(rows);
+
+  // Standings by points
+  const byPoints = [...stats].sort((a,b) => b.totalFinal - a.totalFinal);
+  const byWins   = [...stats].sort((a,b) => b.wins - a.wins || b.totalFinal - a.totalFinal);
+
+  function renderCards(ranked, key) {
+    return ranked.map((p, rank) => {
+      const medal = ['🥇','🥈','🥉',''][rank];
+      const big   = key === 'wins' ? p.wins : p.totalFinal.toLocaleString();
+      const label = key === 'wins' ? 'Daily wins' : 'Total pts';
+      return `<div class="player-card rank-${rank+1}">
+        <div class="rank-badge">${rank+1}</div>
+        <div class="player-name">${medal} ${p.player}</div>
+        <div class="player-stats">
+          <span class="stat-value big">${big}</span>
+          <div class="stat-row"><span class="stat-label">${label}</span></div>
+          <div class="stat-row" style="margin-top:0.3rem">
+            <span class="stat-label">Games played</span>
+            <span class="stat-value">${p.gamesPlayed}</span>
+          </div>
+        </div>
+      </div>`;
+    }).join('');
+  }
+
+  document.getElementById('leaderboardPoints').innerHTML = renderCards(byPoints, 'points');
+  document.getElementById('leaderboardWins').innerHTML   = renderCards(byWins,   'wins');
+
+  // Round averages cards — sorted by point average, with rank badges
+  const maxAvg = 100;
+  const byAvg = [...stats].sort((a, b) => {
+    const avgA = a.gamesPlayed ? a.totalFinal / a.gamesPlayed : 0;
+    const avgB = b.gamesPlayed ? b.totalFinal / b.gamesPlayed : 0;
+    return avgB - avgA;
+  });
+  document.getElementById('roundAvgs').innerHTML = byAvg.map((p, rank) => {
+    const medal = ['🥇','🥈','🥉',''][rank];
+    const hasRoundData = p.roundAvgs.some(v => v !== null);
+    const overallAvg = p.gamesPlayed
+      ? Math.round(p.totalFinal / p.gamesPlayed)
+      : null;
+
+    const roundRows = hasRoundData
+      ? [0,1,2,3,4].map(i => {
+          const val = p.roundAvgs[i];
+          const pct = val ? Math.round((val / maxAvg) * 100) : 0;
+          return `<div class="round-row">
+            <span class="round-label">R${i+1}</span>
+            <div class="round-bar-wrap"><div class="round-bar" style="width:${pct}%"></div></div>
+            <span class="round-val">${val !== null ? val : '—'}</span>
+          </div>`;
+        }).join('')
+      : '<div style="color:var(--muted);font-family:\'DM Mono\',monospace;font-size:0.72rem">No round data yet</div>';
+
+    return `<div class="round-card rank-${rank+1}" style="position:relative;overflow:hidden;">
+      <div class="rank-badge">${rank+1}</div>
+      <div class="round-card-name">${medal} ${p.player}</div>
+      ${overallAvg !== null ? `
+        <span class="stat-value big">${overallAvg}</span>
+        <div class="stat-row" style="margin-bottom:0.75rem"><span class="stat-label">Point Average</span></div>
+      ` : ''}
+      ${roundRows}
+    </div>`;
+  }).join('');
+
+  // Perfect 100s — just total count, styled like standings cards
+  const byPerfects = [...stats].sort((a,b) => b.totalPerfects - a.totalPerfects);
+  document.getElementById('roundPerfects').innerHTML = byPerfects.map((p, rank) => {
+    const medal = ['🥇','🥈','🥉',''][rank];
+    return `<div class="player-card rank-${rank+1}">
+      <div class="rank-badge">${rank+1}</div>
+      <div class="player-name">${medal} ${p.player}</div>
+      <div class="player-stats">
+        <span class="stat-value big" style="color:var(--accent)">${p.totalPerfects}</span>
+        <div class="stat-row"><span class="stat-label">Perfect 100s</span></div>
+      </div>
+    </div>`;
+  }).join('');
+
+  // Accordion by date
+  const accordion = document.getElementById('accordion');
+  if (!rows.length) { accordion.innerHTML = '<div class="empty">No data yet.</div>'; return; }
+
+  const dates = [...new Set(rows.map(r => r.date))];
+  const dateWinners = {};
+  const dateWinnerNames = {};
+  dates.forEach(date => {
+    const day = rows.filter(r => r.date === date && hasScore(r.final));
+    if (!day.length) return;
+    const max = Math.max(...day.map(r => r.final));
+    dateWinners[date] = max;
+    dateWinnerNames[date] = day.find(r => r.final === max)?.player;
+  });
+
+  accordion.className = 'accordion';
+  accordion.innerHTML = dates.map((date, di) => {
+    const dayRows = rows.filter(r => r.date === date);
+    const winnerName = dateWinnerNames[date];
+    const winnerScore = dateWinners[date];
+    const isFirstOpen = di === 0;
+
+    const playerRows = dayRows.map(r => {
+      const isWinner = hasScore(r.final) && r.final === dateWinners[r.date];
+      const finalCell = !hasScore(r.final)
+        ? `<td class="score-miss">—</td>`
+        : isWinner ? `<td class="score-win">${r.final}</td>`
+        : `<td>${r.final}</td>`;
+
+      const roundCells = r.rounds.map(v =>
+        v === 100 ? `<td class="score-perfect">100</td>`
+        : hasScore(v) ? `<td>${v}</td>`
+        : `<td class="score-miss">—</td>`
+      ).join('');
+
+      return `<tr>
+        <td class="player-cell">${isWinner ? '🥇 ' : ''}${r.player}</td>
+        ${roundCells}
+        ${finalCell}
+      </tr>`;
+    }).join('');
+
+    return `<div class="acc-item${isFirstOpen ? ' open' : ''}" onclick="this.classList.toggle('open')">
+      <div class="acc-header">
+        <div class="acc-header-left">
+          <span class="date-cell"><span class="day-label">${getDayOfWeek(date)}</span>${date}</span>
+        </div>
+        <div class="acc-header-right">
+          ${winnerName ? `<span class="acc-winner">
+            <span class="acc-winner-name">🥇 ${winnerName}</span>
+            <span class="acc-winner-score">${winnerScore}</span>
+          </span>` : ''}
+          <span class="acc-chevron">▼</span>
+        </div>
+      </div>
+      <div class="acc-body">
+        <table class="acc-table">
+          <thead><tr>
+            <th>Player</th>
+            <th>R1</th><th>R2</th><th>R3</th><th>R4</th><th>R5</th>
+            <th>Final</th>
+          </tr></thead>
+          <tbody>${playerRows}</tbody>
+        </table>
+      </div>
+    </div>`;
+  }).join('');
+}
+
+// ── LOAD ─────────────────────────────────────
+async function loadData(manual = false) {
+  const btn = document.getElementById('refreshBtn');
+  if (manual) btn.classList.add('spinning');
+  setStatus('', 'Syncing…');
+  try {
+    const data = await fetchSheetData();
+    render(data);
+    setStatus('live', 'Live');
+    const now = new Date();
+    document.getElementById('lastUpdated').textContent =
+      `Last synced: ${now.toLocaleTimeString([], { hour: '2-digit', minute: '2-digit' })}`;
+  } catch(err) {
+    console.error(err);
+    setStatus('error', 'Error loading data');
+    document.getElementById('lastUpdated').textContent = `Error: ${err.message}. Open DevTools (F12) → Console for details.`;
+  } finally {
+    btn.classList.remove('spinning');
+  }
+}
+
+loadData();
+setInterval(() => loadData(), AUTO_REFRESH_MS);
+</script>
+</body>
+</html>
+rface: #13131a;
     --border: #1e1e2e;
     --accent: #ff3c3c;
     --gold: #ffd700;
