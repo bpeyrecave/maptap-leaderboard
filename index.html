@@ -37,13 +37,11 @@
 
   header {
     display: flex;
-    align-items: center;
-    justify-content: space-between;
+    align-items: baseline;
+    gap: 1rem;
     margin-bottom: 2.5rem;
     border-bottom: 1px solid var(--border);
     padding-bottom: 1.5rem;
-    flex-wrap: wrap;
-    gap: 1rem;
   }
 
   .logo {
@@ -53,6 +51,7 @@
     color: var(--text);
     line-height: 1;
   }
+
   .logo span { color: var(--accent); }
 
   .subtitle {
@@ -61,31 +60,9 @@
     color: var(--muted);
     text-transform: uppercase;
     letter-spacing: 0.12em;
-    margin-top: 0.25rem;
   }
 
-  .status-pill {
-    display: flex;
-    align-items: center;
-    gap: 0.4rem;
-    font-family: 'DM Mono', monospace;
-    font-size: 0.7rem;
-    color: var(--muted);
-    background: var(--surface);
-    border: 1px solid var(--border);
-    border-radius: 20px;
-    padding: 0.35rem 0.75rem;
-  }
-
-  .status-dot {
-    width: 6px; height: 6px;
-    border-radius: 50%;
-    background: var(--muted);
-    transition: background 0.3s;
-  }
-  .status-dot.live { background: var(--green); box-shadow: 0 0 6px var(--green); }
-  .status-dot.error { background: var(--accent); }
-
+  /* LEADERBOARD */
   .section-title {
     font-family: 'DM Mono', monospace;
     font-size: 0.7rem;
@@ -113,6 +90,7 @@
   }
 
   .player-card:hover { transform: translateY(-2px); border-color: var(--accent); }
+
   .player-card.rank-1 { border-color: var(--gold); }
   .player-card.rank-1::before {
     content: '';
@@ -132,8 +110,18 @@
   .rank-2 .rank-badge { color: var(--silver); opacity: 0.4; }
   .rank-3 .rank-badge { color: var(--bronze); opacity: 0.4; }
 
-  .player-name { font-size: 1.1rem; font-weight: 700; margin-bottom: 0.5rem; letter-spacing: 0.02em; }
-  .player-stats { display: flex; flex-direction: column; gap: 0.2rem; }
+  .player-name {
+    font-size: 1.1rem;
+    font-weight: 700;
+    margin-bottom: 0.5rem;
+    letter-spacing: 0.02em;
+  }
+
+  .player-stats {
+    display: flex;
+    flex-direction: column;
+    gap: 0.2rem;
+  }
 
   .stat-row {
     display: flex;
@@ -154,6 +142,21 @@
     margin: 0.25rem 0;
   }
 
+  .wins-badge {
+    display: inline-flex;
+    align-items: center;
+    gap: 0.3rem;
+    background: rgba(255,60,60,0.1);
+    border: 1px solid rgba(255,60,60,0.2);
+    border-radius: 20px;
+    padding: 0.15rem 0.5rem;
+    font-size: 0.7rem;
+    font-family: 'DM Mono', monospace;
+    color: var(--accent);
+    margin-top: 0.4rem;
+  }
+
+  /* DAILY TABLE */
   .table-wrap {
     background: var(--surface);
     border: 1px solid var(--border);
@@ -162,8 +165,16 @@
     margin-bottom: 2.5rem;
   }
 
-  table { width: 100%; border-collapse: collapse; font-size: 0.85rem; }
-  thead tr { background: rgba(255,60,60,0.06); border-bottom: 1px solid var(--border); }
+  table {
+    width: 100%;
+    border-collapse: collapse;
+    font-size: 0.85rem;
+  }
+
+  thead tr {
+    background: rgba(255,60,60,0.06);
+    border-bottom: 1px solid var(--border);
+  }
 
   th {
     padding: 0.75rem 1rem;
@@ -175,13 +186,23 @@
     color: var(--muted);
     font-weight: 500;
   }
+
   th:not(:first-child) { text-align: center; }
 
-  tbody tr { border-bottom: 1px solid var(--border); transition: background 0.15s; }
+  tbody tr {
+    border-bottom: 1px solid var(--border);
+    transition: background 0.15s;
+  }
+
   tbody tr:last-child { border-bottom: none; }
   tbody tr:hover { background: rgba(255,255,255,0.02); }
 
-  td { padding: 0.65rem 1rem; font-family: 'DM Mono', monospace; font-size: 0.8rem; }
+  td {
+    padding: 0.65rem 1rem;
+    font-family: 'DM Mono', monospace;
+    font-size: 0.8rem;
+  }
+
   td:not(:first-child) { text-align: center; }
 
   .date-cell { color: var(--muted); font-size: 0.75rem; white-space: nowrap; }
@@ -197,45 +218,138 @@
     margin-right: 0.3rem;
   }
 
-  .score-win { color: var(--green); font-weight: 600; }
-  .score-win::after { content: ' 👑'; font-size: 0.65rem; }
-  .score-miss { color: var(--muted); font-size: 0.7rem; }
-
-  .skeleton {
-    background: linear-gradient(90deg, var(--surface) 25%, var(--border) 50%, var(--surface) 75%);
-    background-size: 200% 100%;
-    animation: shimmer 1.4s infinite;
-    border-radius: 6px;
-    height: 1rem;
-    display: block;
+  .score-win {
+    color: var(--green);
+    font-weight: 600;
   }
-  @keyframes shimmer { 0% { background-position: 200% 0; } 100% { background-position: -200% 0; } }
 
-  .last-updated {
-    font-family: 'DM Mono', monospace;
+  .score-win::after {
+    content: ' 👑';
     font-size: 0.65rem;
-    color: var(--muted);
-    text-align: right;
-    margin-bottom: 2rem;
-    margin-top: -1.5rem;
   }
 
-  .empty { text-align: center; padding: 2rem; color: var(--muted); font-family: 'DM Mono', monospace; font-size: 0.8rem; }
+  .score-dropped {
+    color: var(--muted);
+    text-decoration: line-through;
+  }
 
-  .refresh-btn {
+  .score-miss {
+    color: var(--muted);
+    font-size: 0.7rem;
+  }
+
+  /* INPUT SECTION */
+  .input-section {
+    background: var(--surface);
+    border: 1px solid var(--border);
+    border-radius: 12px;
+    padding: 1.25rem;
+    margin-bottom: 2rem;
+  }
+
+  .input-header {
+    display: flex;
+    align-items: center;
+    justify-content: space-between;
+    margin-bottom: 1rem;
+  }
+
+  textarea {
+    width: 100%;
+    background: var(--bg);
+    border: 1px solid var(--border);
+    border-radius: 8px;
+    color: var(--text);
+    font-family: 'DM Mono', monospace;
+    font-size: 0.78rem;
+    padding: 0.75rem;
+    resize: vertical;
+    min-height: 80px;
+    outline: none;
+    transition: border-color 0.2s;
+  }
+
+  textarea:focus { border-color: var(--accent); }
+  textarea::placeholder { color: var(--muted); }
+
+  .btn {
+    background: var(--accent);
+    color: white;
+    border: none;
+    border-radius: 8px;
+    padding: 0.6rem 1.25rem;
+    font-family: 'Space Grotesk', sans-serif;
+    font-weight: 700;
+    font-size: 0.85rem;
+    cursor: pointer;
+    transition: opacity 0.2s, transform 0.1s;
+    letter-spacing: 0.03em;
+    margin-top: 0.75rem;
+  }
+
+  .btn:hover { opacity: 0.85; }
+  .btn:active { transform: scale(0.98); }
+
+  .btn-ghost {
     background: transparent;
     border: 1px solid var(--border);
     color: var(--muted);
-    border-radius: 8px;
-    padding: 0.4rem 0.9rem;
-    font-family: 'DM Mono', monospace;
-    font-size: 0.72rem;
-    cursor: pointer;
-    transition: all 0.2s;
-    letter-spacing: 0.05em;
   }
-  .refresh-btn:hover { border-color: var(--accent); color: var(--accent); }
-  .refresh-btn.spinning { opacity: 0.5; pointer-events: none; }
+
+  .btn-ghost:hover { border-color: var(--accent); color: var(--accent); opacity: 1; }
+
+  .parse-feedback {
+    font-family: 'DM Mono', monospace;
+    font-size: 0.75rem;
+    margin-top: 0.5rem;
+    color: var(--green);
+    min-height: 1.2em;
+  }
+
+  .parse-feedback.error { color: var(--accent); }
+
+  .controls { display: flex; gap: 0.5rem; flex-wrap: wrap; margin-top: 0.75rem; }
+
+  /* PLAYER CONFIG */
+  .player-config {
+    display: flex;
+    gap: 0.5rem;
+    flex-wrap: wrap;
+    margin-bottom: 1rem;
+  }
+
+  .player-tag {
+    display: flex;
+    align-items: center;
+    gap: 0.4rem;
+    background: var(--bg);
+    border: 1px solid var(--border);
+    border-radius: 6px;
+    padding: 0.3rem 0.6rem;
+    font-family: 'DM Mono', monospace;
+    font-size: 0.75rem;
+    color: var(--text);
+  }
+
+  .player-tag .initial {
+    width: 20px; height: 20px;
+    border-radius: 50%;
+    display: flex; align-items: center; justify-content: center;
+    font-size: 0.65rem;
+    font-weight: 700;
+    background: var(--accent);
+    color: white;
+    flex-shrink: 0;
+  }
+
+  /* EMPTY STATE */
+  .empty { 
+    text-align: center; 
+    padding: 2rem; 
+    color: var(--muted);
+    font-family: 'DM Mono', monospace;
+    font-size: 0.8rem;
+  }
 </style>
 </head>
 <body>
@@ -246,171 +360,222 @@
       <div class="logo">MAP<span>TAP</span></div>
       <div class="subtitle">Group Leaderboard · 2026</div>
     </div>
-    <div style="display:flex;align-items:center;gap:0.75rem;">
-      <button class="refresh-btn" onclick="loadData(true)" id="refreshBtn">↻ Refresh</button>
-      <div class="status-pill">
-        <div class="status-dot" id="statusDot"></div>
-        <span id="statusText">Loading…</span>
-      </div>
-    </div>
   </header>
 
-  <div class="last-updated" id="lastUpdated"></div>
-
-  <div class="section-title">🏆 Standings by Points</div>
-  <div class="leaderboard" id="leaderboardPoints">
-    <div class="player-card"><span class="skeleton" style="width:60%;margin-bottom:0.75rem"></span><span class="skeleton" style="width:40%;height:2rem"></span></div>
-    <div class="player-card"><span class="skeleton" style="width:60%;margin-bottom:0.75rem"></span><span class="skeleton" style="width:40%;height:2rem"></span></div>
-    <div class="player-card"><span class="skeleton" style="width:60%;margin-bottom:0.75rem"></span><span class="skeleton" style="width:40%;height:2rem"></span></div>
-    <div class="player-card"><span class="skeleton" style="width:60%;margin-bottom:0.75rem"></span><span class="skeleton" style="width:40%;height:2rem"></span></div>
+  <!-- INPUT -->
+  <div class="input-section">
+    <div class="input-header">
+      <div class="section-title">📋 Paste Result from Teams</div>
+    </div>
+    <div class="player-config" id="playerConfig"></div>
+    <textarea id="resultInput" placeholder="www.maptap.gg March 12&#10;100🎯 90👑 85😁 99🎯 62🫢&#10;Final score: 843"></textarea>
+    <div class="controls">
+      <button class="btn" onclick="parseAndAdd()">+ Add Result</button>
+      <button class="btn btn-ghost" onclick="clearAll()">Clear All</button>
+    </div>
+    <div class="parse-feedback" id="feedback"></div>
   </div>
+
+  <!-- LEADERBOARD CARDS -->
+  <div class="section-title">🏆 Standings by Points</div>
+  <div class="leaderboard" id="leaderboardPoints"></div>
 
   <div class="section-title" style="margin-top:1.5rem">👑 Standings by Daily Wins</div>
-  <div class="leaderboard" id="leaderboardWins">
-    <div class="player-card"><span class="skeleton" style="width:60%;margin-bottom:0.75rem"></span><span class="skeleton" style="width:40%;height:2rem"></span></div>
-    <div class="player-card"><span class="skeleton" style="width:60%;margin-bottom:0.75rem"></span><span class="skeleton" style="width:40%;height:2rem"></span></div>
-    <div class="player-card"><span class="skeleton" style="width:60%;margin-bottom:0.75rem"></span><span class="skeleton" style="width:40%;height:2rem"></span></div>
-    <div class="player-card"><span class="skeleton" style="width:60%;margin-bottom:0.75rem"></span><span class="skeleton" style="width:40%;height:2rem"></span></div>
-  </div>
+  <div class="leaderboard" id="leaderboardWins"></div>
 
+  <!-- DAILY TABLE -->
   <div class="section-title">📅 Points by Date</div>
   <div class="table-wrap">
     <table>
       <thead>
         <tr>
           <th>Date</th>
-          <th>Jura</th>
-          <th>Adam</th>
-          <th>Berta</th>
-          <th>Andrew</th>
+          <th id="th0">—</th>
+          <th id="th1">—</th>
+          <th id="th2">—</th>
+          <th id="th3">—</th>
         </tr>
       </thead>
-      <tbody id="dailyBody">
-        <tr><td colspan="5" class="empty">Loading…</td></tr>
-      </tbody>
+      <tbody id="dailyBody"></tbody>
     </table>
   </div>
 
 </div>
 
 <script>
-// ═══════════════════════════════════════════════
-// !! REPLACE THIS WITH YOUR GOOGLE SHEET ID !!
-const SHEET_ID = '1YOh6ah35-qDKM3p5CnT7jbeyMIY637-WDXF0_xVPKE4';
-const SHEET_NAME = 'Sheet1'; // change if your tab is named differently
-// ═══════════════════════════════════════════════
-
+// ── CONFIG ──────────────────────────────────────────────
 const PLAYERS = ['Jura', 'Adam', 'Berta', 'Andrew'];
-const AUTO_REFRESH_MS = 60000; // auto-refresh every 60s
+const INITIALS = ['JK', 'AP', 'BP', 'AH'];
 
-function played(s) {
-  return s !== null && s !== undefined && s !== '' && Number(s) > 0;
+// ── STATE ───────────────────────────────────────────────
+let results = JSON.parse(localStorage.getItem('maptap_results_v2') || '[]');
+
+// Pre-load data from screenshot
+if (results.length === 0) {
+  results = [
+    { date: '12/03/26', scores: [950, 652, 843, 597], dropped: [false,false,false,false], didntPlay: [false,false,false,false] },
+    { date: '11/03/26', scores: [916, 950, 891, 955], dropped: [false,false,false,false], didntPlay: [false,false,false,false] },
+    { date: '10/03/26', scores: [886, 853, 914, 0],   dropped: [false,false,false,false], didntPlay: [false,false,false,false] },
+    { date: '09/03/26', scores: [893, 790, 853, 958], dropped: [false,false,false,false], didntPlay: [false,false,false,false] },
+    { date: '06/03/26', scores: [871, 908, 828, 922], dropped: [false,false,false,false], didntPlay: [false,false,false,false] },
+    { date: '05/03/26', scores: [967, 847, 824, 968], dropped: [false,false,false,false], didntPlay: [false,false,false,false] },
+    { date: '04/03/26', scores: [895, 952, 907, 952], dropped: [false,false,false,false], didntPlay: [false,false,false,false] },
+    { date: '03/03/26', scores: [907, 920, 940, 921], dropped: [false,false,false,false], didntPlay: [false,false,false,false] },
+  ];
+  save();
 }
 
 function getDayOfWeek(dateStr) {
+  // dateStr format: DD/MM/YY
   const [d, m, y] = dateStr.split('/');
   const date = new Date(`20${y}-${m}-${d}`);
   return ['Sun','Mon','Tue','Wed','Thu','Fri','Sat'][date.getDay()];
 }
 
-function setStatus(state, text) {
-  document.getElementById('statusDot').className = 'status-dot ' + state;
-  document.getElementById('statusText').textContent = text;
+function save() {
+  localStorage.setItem('maptap_results_v2', JSON.stringify(results));
 }
 
-async function fetchSheetData() {
-  const csvUrl = `https://docs.google.com/spreadsheets/d/${SHEET_ID}/export?format=csv&sheet=${encodeURIComponent(SHEET_NAME)}`;
+// ── PARSE ───────────────────────────────────────────────
+function parseResult(text) {
+  // Extract date like "March 12" or "12 March"
+  const dateMatch = text.match(/(?:january|february|march|april|may|june|july|august|september|october|november|december)\s+(\d{1,2})|(\d{1,2})\s+(?:january|february|march|april|may|june|july|august|september|october|november|december)/i);
   
-  // Try multiple CORS proxies in order
-  const proxies = [
-    url => `https://corsproxy.io/?${encodeURIComponent(url)}`,
-    url => `https://api.codetabs.com/v1/proxy?quest=${encodeURIComponent(url)}`,
-    url => `https://api.allorigins.win/get?url=${encodeURIComponent(url)}`,
-  ];
-
-  let lastErr;
-  for (const makeProxy of proxies) {
-    try {
-      const res = await fetch(makeProxy(csvUrl), { signal: AbortSignal.timeout(8000) });
-      if (!res.ok) throw new Error(`HTTP ${res.status}`);
-      const text = res.headers.get('content-type')?.includes('json')
-        ? (await res.json()).contents
-        : await res.text();
-      if (!text || text.includes('<!DOCTYPE')) throw new Error('Got HTML — sheet may not be published');
-      return parseCSV(text);
-    } catch (e) {
-      lastErr = e;
-      console.warn('Proxy failed, trying next...', e.message);
+  // Extract final score
+  const scoreMatch = text.match(/final\s*score[:\s]*(\d+)/i);
+  
+  if (!scoreMatch) return null;
+  
+  const finalScore = parseInt(scoreMatch[1]);
+  
+  // Detect player from text — look for name mentions
+  let playerIdx = -1;
+  // Try to figure out date
+  let dateStr = '';
+  if (dateMatch) {
+    const months = ['jan','feb','mar','apr','may','jun','jul','aug','sep','oct','nov','dec'];
+    const fullMonths = ['january','february','march','april','may','june','july','august','september','october','november','december'];
+    const raw = dateMatch[0].toLowerCase();
+    let monthNum = -1;
+    fullMonths.forEach((m, i) => { if (raw.includes(m)) monthNum = i + 1; });
+    months.forEach((m, i) => { if (raw.includes(m) && monthNum === -1) monthNum = i + 1; });
+    const dayMatch = raw.match(/\d+/);
+    if (dayMatch && monthNum > 0) {
+      dateStr = `${String(dayMatch[0]).padStart(2,'0')}/${String(monthNum).padStart(2,'0')}/26`;
     }
   }
-  throw lastErr;
+
+  return { finalScore, dateStr };
 }
 
-function parseCSV(text) {
-  const lines = text.trim().split('\n').map(l => {
-    // Handle quoted CSV fields properly
-    const cols = [];
-    let cur = '', inQ = false;
-    for (let i = 0; i < l.length; i++) {
-      if (l[i] === '"') { inQ = !inQ; }
-      else if (l[i] === ',' && !inQ) { cols.push(cur.trim()); cur = ''; }
-      else { cur += l[i]; }
-    }
-    cols.push(cur.trim());
-    return cols;
-  });
+function parseAndAdd() {
+  const text = document.getElementById('resultInput').value.trim();
+  const fb = document.getElementById('feedback');
+  
+  if (!text) {
+    fb.textContent = 'Paste a result first.';
+    fb.className = 'parse-feedback error';
+    return;
+  }
 
-  return lines.slice(1)       // skip header
-    .filter(r => r[0])        // skip empty rows
-    .map(r => ({
-      date: r[0],
-      scores: [1,2,3,4].map(i => (r[i] && r[i] !== '') ? Number(r[i]) : null)
-    }))
-    .sort((a, b) => {
+  const parsed = parseResult(text);
+  if (!parsed || !parsed.finalScore) {
+    fb.textContent = '⚠ Could not parse score. Make sure "Final score: XXX" is included.';
+    fb.className = 'parse-feedback error';
+    return;
+  }
+
+  // Ask which player
+  const playerName = prompt(`Score parsed: ${parsed.finalScore}\nDate: ${parsed.dateStr || 'unknown'}\n\nWhich player?\n${PLAYERS.map((p,i) => `${i+1}. ${p}`).join('\n')}\n\nEnter number (1-4):`);
+  const pIdx = parseInt(playerName) - 1;
+  if (isNaN(pIdx) || pIdx < 0 || pIdx > 3) {
+    fb.textContent = '⚠ Invalid player selection.';
+    fb.className = 'parse-feedback error';
+    return;
+  }
+
+  const date = parsed.dateStr || prompt('Enter date (DD/MM/YY):');
+  
+  // Find existing row or create
+  let row = results.find(r => r.date === date);
+  if (!row) {
+    row = { date, scores: [null,null,null,null], dropped: [false,false,false,false], didntPlay: [true,true,true,true] };
+    results.push(row);
+    results.sort((a,b) => {
       const pa = a.date.split('/').reverse().join('');
       const pb = b.date.split('/').reverse().join('');
       return pb.localeCompare(pa);
     });
+  }
+  
+  row.scores[pIdx] = parsed.finalScore;
+  row.didntPlay[pIdx] = false;
+  recalcDropped();
+  save();
+  render();
+  
+  document.getElementById('resultInput').value = '';
+  fb.textContent = `✓ Added ${PLAYERS[pIdx]}: ${parsed.finalScore} on ${date}`;
+  fb.className = 'parse-feedback';
 }
 
-function getTotals(results) {
+// ── RECALC ──────────────────────────────────────────────
+function recalcDropped() {
+  // No scores are dropped - count everything
+  results.forEach(r => r.dropped = [false, false, false, false]);
+}
+
+function getTotals() {
   return PLAYERS.map((_, pi) => {
-    let total = 0, wins = 0, gamesPlayed = 0;
+    let total = 0, wins = 0;
 
     results.forEach(r => {
-      if (played(r.scores[pi])) {
-        total += Number(r.scores[pi]);
-        gamesPlayed++;
+      // Only count scores that: player played (not X), score exists, and score wasn't dropped
+      if (!r.didntPlay[pi] && r.scores[pi] !== null && !r.dropped[pi]) {
+        total += r.scores[pi];
       }
     });
 
+    // Count daily wins — only among players who actually played that day
     results.forEach(r => {
-      const todayPlayed = r.scores
-        .map((s, i) => ({ i, s: Number(s) }))
-        .filter(x => played(x.s));
-      if (!todayPlayed.length) return;
-      const max = Math.max(...todayPlayed.map(x => x.s));
-      if (played(r.scores[pi]) && Number(r.scores[pi]) === max) wins++;
+      const playedScores = PLAYERS
+        .map((_, i) => ({ i, score: r.scores[i] }))
+        .filter(x => !r.didntPlay[x.i] && x.score !== null);
+
+      if (playedScores.length === 0) return;
+      const maxScore = Math.max(...playedScores.map(x => x.score));
+      if (!r.didntPlay[pi] && r.scores[pi] === maxScore) wins++;
     });
 
-    return { total, wins, gamesPlayed };
+    return { total, wins };
   });
 }
 
-function render(results) {
-  const totals = getTotals(results);
+// ── RENDER ──────────────────────────────────────────────
+function render() {
+  recalcDropped();
+  const totals = getTotals();
 
+  // Update table headers
+  PLAYERS.forEach((p, i) => {
+    document.getElementById(`th${i}`).textContent = p;
+  });
+
+  // Sort players by total points
   const rankedByPoints = PLAYERS.map((p, i) => ({ name: p, idx: i, ...totals[i] }))
-    .sort((a, b) => b.total - a.total);
+    .sort((a,b) => b.total - a.total);
 
+  // Sort players by wins (tiebreak: total points)
   const rankedByWins = PLAYERS.map((p, i) => ({ name: p, idx: i, ...totals[i] }))
-    .sort((a, b) => b.wins - a.wins || b.total - a.total);
+    .sort((a,b) => b.wins - a.wins || b.total - a.total);
 
   function renderCards(ranked, highlightKey) {
     return ranked.map((p, rank) => {
       const medal = rank === 0 ? '🥇' : rank === 1 ? '🥈' : rank === 2 ? '🥉' : '';
       const bigValue = highlightKey === 'wins' ? p.wins : p.total.toLocaleString();
       const bigLabel = highlightKey === 'wins' ? 'Daily wins' : 'Total pts';
+      const subLabel = highlightKey === 'wins' ? 'Total pts' : 'Daily wins';
+      const subValue = highlightKey === 'wins' ? p.total.toLocaleString() : p.wins;
       return `
       <div class="player-card rank-${rank+1}">
         <div class="rank-badge">${rank+1}</div>
@@ -419,8 +584,12 @@ function render(results) {
           <span class="stat-value big">${bigValue}</span>
           <div class="stat-row"><span class="stat-label">${bigLabel}</span></div>
           <div class="stat-row" style="margin-top:0.3rem">
+            <span class="stat-label">${subLabel}</span>
+            <span class="stat-value">${subValue}</span>
+          </div>
+          <div class="stat-row">
             <span class="stat-label">Games played</span>
-            <span class="stat-value">${p.gamesPlayed}</span>
+            <span class="stat-value">${results.filter(r => !r.didntPlay[p.idx] && r.scores[p.idx] !== null).length}</span>
           </div>
         </div>
       </div>`;
@@ -430,54 +599,46 @@ function render(results) {
   document.getElementById('leaderboardPoints').innerHTML = renderCards(rankedByPoints, 'points');
   document.getElementById('leaderboardWins').innerHTML = renderCards(rankedByWins, 'wins');
 
+  // DAILY TABLE
   const tbody = document.getElementById('dailyBody');
-  if (!results.length) {
-    tbody.innerHTML = '<tr><td colspan="5" class="empty">No data yet.</td></tr>';
-    return;
-  }
-
   tbody.innerHTML = results.map(r => {
-    const todayPlayed = r.scores.map((s, i) => ({ i, s: Number(s) })).filter(x => played(x.s));
-    const max = todayPlayed.length ? Math.max(...todayPlayed.map(x => x.s)) : -1;
+    // Find daily winner — only among players who actually played
+    const playedToday = PLAYERS
+      .map((_, i) => ({ i, score: r.scores[i] }))
+      .filter(x => !r.didntPlay[x.i] && x.score !== null);
+    const maxScore = playedToday.length > 0 ? Math.max(...playedToday.map(x => x.score)) : -1;
 
-    const cells = r.scores.map(s => {
-      if (!played(s)) return `<td class="score-miss">—</td>`;
-      return Number(s) === max
-        ? `<td class="score-win">${s}</td>`
-        : `<td>${s}</td>`;
+    const cells = PLAYERS.map((_, i) => {
+      if (r.didntPlay[i] || r.scores[i] === null) return `<td class="score-miss">—</td>`;
+      const isWin = r.scores[i] === maxScore;
+      const isDropped = r.dropped[i];
+      if (isDropped) return `<td class="score-dropped">${r.scores[i]}</td>`;
+      if (isWin) return `<td class="score-win">${r.scores[i]}</td>`;
+      return `<td>${r.scores[i]}</td>`;
     }).join('');
 
-    return `<tr>
-      <td class="date-cell"><span class="day-label">${getDayOfWeek(r.date)}</span>${r.date}</td>
-      ${cells}
-    </tr>`;
+    return `<tr><td class="date-cell"><span class="day-label">${getDayOfWeek(r.date)}</span> ${r.date}</td>${cells}</tr>`;
   }).join('');
-}
 
-async function loadData(manual = false) {
-  const btn = document.getElementById('refreshBtn');
-  if (manual) btn.classList.add('spinning');
-  setStatus('', 'Syncing…');
-
-  try {
-    const data = await fetchSheetData();
-    render(data);
-    setStatus('live', 'Live');
-    const now = new Date();
-    document.getElementById('lastUpdated').textContent =
-      `Last synced: ${now.toLocaleTimeString([], { hour: '2-digit', minute: '2-digit' })}`;
-  } catch (err) {
-    console.error(err);
-    setStatus('error', 'Error loading data');
-    document.getElementById('lastUpdated').textContent =
-      `Error: ${err.message}. Open DevTools (F12) → Console for details.`;
-  } finally {
-    btn.classList.remove('spinning');
+  if (results.length === 0) {
+    tbody.innerHTML = '<tr><td colspan="5" class="empty">No results yet. Paste one above!</td></tr>';
   }
 }
 
-loadData();
-setInterval(() => loadData(), AUTO_REFRESH_MS);
+function clearAll() {
+  if (confirm('Clear all results?')) {
+    results = [];
+    save();
+    render();
+  }
+}
+
+// Render player tags
+document.getElementById('playerConfig').innerHTML = PLAYERS.map((p, i) =>
+  `<div class="player-tag"><div class="initial">${INITIALS[i]}</div>${p}</div>`
+).join('');
+
+render();
 </script>
 </body>
 </html>
