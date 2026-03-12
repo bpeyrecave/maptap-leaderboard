@@ -320,15 +320,30 @@ function setStatus(state, text) {
 
 async function fetchSheetData() {
   const csvUrl = `https://docs.google.com/spreadsheets/d/${SHEET_ID}/export?format=csv&sheet=${encodeURIComponent(SHEET_NAME)}`;
-  // Route through AllOrigins proxy to bypass CORS
-  const proxyUrl = `https://api.allorigins.win/get?url=${encodeURIComponent(csvUrl)}`;
   
-  const res = await fetch(proxyUrl);
-  if (!res.ok) throw new Error(`HTTP ${res.status}`);
-  const data = await res.json();
-  if (!data.contents) throw new Error('Empty response from proxy');
-  if (data.contents.includes('<!DOCTYPE')) throw new Error('Sheet not public — publish it first');
-  return parseCSV(data.contents);
+  // Try multiple CORS proxies in order
+  const proxies = [
+    url => `https://corsproxy.io/?${encodeURIComponent(url)}`,
+    url => `https://api.codetabs.com/v1/proxy?quest=${encodeURIComponent(url)}`,
+    url => `https://api.allorigins.win/get?url=${encodeURIComponent(url)}`,
+  ];
+
+  let lastErr;
+  for (const makeProxy of proxies) {
+    try {
+      const res = await fetch(makeProxy(csvUrl), { signal: AbortSignal.timeout(8000) });
+      if (!res.ok) throw new Error(`HTTP ${res.status}`);
+      const text = res.headers.get('content-type')?.includes('json')
+        ? (await res.json()).contents
+        : await res.text();
+      if (!text || text.includes('<!DOCTYPE')) throw new Error('Got HTML — sheet may not be published');
+      return parseCSV(text);
+    } catch (e) {
+      lastErr = e;
+      console.warn('Proxy failed, trying next...', e.message);
+    }
+  }
+  throw lastErr;
 }
 
 function parseCSV(text) {
