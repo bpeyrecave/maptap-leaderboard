@@ -450,6 +450,11 @@ function render(rows) {
       <div class="player-name">${medal} ${p.player}</div>
       <div class="player-stats">
         <span class="stat-value big" style="color:var(--accent)">${p.totalPerfects}</span>
+        ${p.perfectCounts.map((count, i) => `
+        <div class="stat-row">
+          <span class="stat-label">Round ${i+1}</span>
+          <span class="stat-value">${count > 0 ? `×${count} 🎯` : '—'}</span>
+        </div>`).join('')}
       </div>
     </div>`;
   }).join('');
