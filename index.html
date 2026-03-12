@@ -1,0 +1,644 @@
+<!DOCTYPE html>
+<html lang="en">
+<head>
+<meta charset="UTF-8">
+<meta name="viewport" content="width=device-width, initial-scale=1.0">
+<title>MapTap Leaderboard</title>
+<link href="https://fonts.googleapis.com/css2?family=Bebas+Neue&family=DM+Mono:wght@400;500&family=Space+Grotesk:wght@400;600;700&display=swap" rel="stylesheet">
+<style>
+  :root {
+    --bg: #0a0a0f;
+    --surface: #13131a;
+    --border: #1e1e2e;
+    --accent: #ff3c3c;
+    --gold: #ffd700;
+    --silver: #c0c0c0;
+    --bronze: #cd7f32;
+    --text: #e8e8f0;
+    --muted: #5a5a7a;
+    --green: #00ff88;
+  }
+
+  * { margin: 0; padding: 0; box-sizing: border-box; }
+
+  body {
+    background: var(--bg);
+    color: var(--text);
+    font-family: 'Space Grotesk', sans-serif;
+    min-height: 100vh;
+    padding: 2rem 1rem;
+    background-image: 
+      radial-gradient(ellipse 80% 40% at 50% -10%, rgba(255,60,60,0.12) 0%, transparent 60%),
+      repeating-linear-gradient(0deg, transparent, transparent 39px, rgba(255,255,255,0.015) 39px, rgba(255,255,255,0.015) 40px),
+      repeating-linear-gradient(90deg, transparent, transparent 39px, rgba(255,255,255,0.015) 39px, rgba(255,255,255,0.015) 40px);
+  }
+
+  .container { max-width: 860px; margin: 0 auto; }
+
+  header {
+    display: flex;
+    align-items: baseline;
+    gap: 1rem;
+    margin-bottom: 2.5rem;
+    border-bottom: 1px solid var(--border);
+    padding-bottom: 1.5rem;
+  }
+
+  .logo {
+    font-family: 'Bebas Neue', sans-serif;
+    font-size: 3.5rem;
+    letter-spacing: 0.04em;
+    color: var(--text);
+    line-height: 1;
+  }
+
+  .logo span { color: var(--accent); }
+
+  .subtitle {
+    font-family: 'DM Mono', monospace;
+    font-size: 0.75rem;
+    color: var(--muted);
+    text-transform: uppercase;
+    letter-spacing: 0.12em;
+  }
+
+  /* LEADERBOARD */
+  .section-title {
+    font-family: 'DM Mono', monospace;
+    font-size: 0.7rem;
+    text-transform: uppercase;
+    letter-spacing: 0.15em;
+    color: var(--muted);
+    margin-bottom: 0.75rem;
+  }
+
+  .leaderboard {
+    display: grid;
+    grid-template-columns: repeat(auto-fit, minmax(180px, 1fr));
+    gap: 0.75rem;
+    margin-bottom: 2.5rem;
+  }
+
+  .player-card {
+    background: var(--surface);
+    border: 1px solid var(--border);
+    border-radius: 12px;
+    padding: 1.25rem 1rem 1rem;
+    position: relative;
+    overflow: hidden;
+    transition: transform 0.2s, border-color 0.2s;
+  }
+
+  .player-card:hover { transform: translateY(-2px); border-color: var(--accent); }
+
+  .player-card.rank-1 { border-color: var(--gold); }
+  .player-card.rank-1::before {
+    content: '';
+    position: absolute; top: 0; left: 0; right: 0; height: 2px;
+    background: linear-gradient(90deg, transparent, var(--gold), transparent);
+  }
+
+  .rank-badge {
+    position: absolute;
+    top: 0.75rem; right: 0.75rem;
+    font-family: 'Bebas Neue', sans-serif;
+    font-size: 1.8rem;
+    line-height: 1;
+    opacity: 0.15;
+  }
+  .rank-1 .rank-badge { color: var(--gold); opacity: 0.5; }
+  .rank-2 .rank-badge { color: var(--silver); opacity: 0.4; }
+  .rank-3 .rank-badge { color: var(--bronze); opacity: 0.4; }
+
+  .player-name {
+    font-size: 1.1rem;
+    font-weight: 700;
+    margin-bottom: 0.5rem;
+    letter-spacing: 0.02em;
+  }
+
+  .player-stats {
+    display: flex;
+    flex-direction: column;
+    gap: 0.2rem;
+  }
+
+  .stat-row {
+    display: flex;
+    justify-content: space-between;
+    align-items: center;
+    font-family: 'DM Mono', monospace;
+    font-size: 0.75rem;
+  }
+
+  .stat-label { color: var(--muted); }
+  .stat-value { font-weight: 500; font-size: 0.85rem; }
+  .stat-value.big {
+    font-family: 'Bebas Neue', sans-serif;
+    font-size: 2rem;
+    color: var(--accent);
+    line-height: 1;
+    display: block;
+    margin: 0.25rem 0;
+  }
+
+  .wins-badge {
+    display: inline-flex;
+    align-items: center;
+    gap: 0.3rem;
+    background: rgba(255,60,60,0.1);
+    border: 1px solid rgba(255,60,60,0.2);
+    border-radius: 20px;
+    padding: 0.15rem 0.5rem;
+    font-size: 0.7rem;
+    font-family: 'DM Mono', monospace;
+    color: var(--accent);
+    margin-top: 0.4rem;
+  }
+
+  /* DAILY TABLE */
+  .table-wrap {
+    background: var(--surface);
+    border: 1px solid var(--border);
+    border-radius: 12px;
+    overflow: hidden;
+    margin-bottom: 2.5rem;
+  }
+
+  table {
+    width: 100%;
+    border-collapse: collapse;
+    font-size: 0.85rem;
+  }
+
+  thead tr {
+    background: rgba(255,60,60,0.06);
+    border-bottom: 1px solid var(--border);
+  }
+
+  th {
+    padding: 0.75rem 1rem;
+    text-align: left;
+    font-family: 'DM Mono', monospace;
+    font-size: 0.68rem;
+    text-transform: uppercase;
+    letter-spacing: 0.1em;
+    color: var(--muted);
+    font-weight: 500;
+  }
+
+  th:not(:first-child) { text-align: center; }
+
+  tbody tr {
+    border-bottom: 1px solid var(--border);
+    transition: background 0.15s;
+  }
+
+  tbody tr:last-child { border-bottom: none; }
+  tbody tr:hover { background: rgba(255,255,255,0.02); }
+
+  td {
+    padding: 0.65rem 1rem;
+    font-family: 'DM Mono', monospace;
+    font-size: 0.8rem;
+  }
+
+  td:not(:first-child) { text-align: center; }
+
+  .date-cell { color: var(--muted); font-size: 0.75rem; white-space: nowrap; }
+  .day-label {
+    display: inline-block;
+    background: rgba(255,60,60,0.12);
+    color: var(--accent);
+    border-radius: 4px;
+    padding: 0.1rem 0.35rem;
+    font-size: 0.65rem;
+    font-weight: 500;
+    letter-spacing: 0.05em;
+    margin-right: 0.3rem;
+  }
+
+  .score-win {
+    color: var(--green);
+    font-weight: 600;
+  }
+
+  .score-win::after {
+    content: ' 👑';
+    font-size: 0.65rem;
+  }
+
+  .score-dropped {
+    color: var(--muted);
+    text-decoration: line-through;
+  }
+
+  .score-miss {
+    color: var(--muted);
+    font-size: 0.7rem;
+  }
+
+  /* INPUT SECTION */
+  .input-section {
+    background: var(--surface);
+    border: 1px solid var(--border);
+    border-radius: 12px;
+    padding: 1.25rem;
+    margin-bottom: 2rem;
+  }
+
+  .input-header {
+    display: flex;
+    align-items: center;
+    justify-content: space-between;
+    margin-bottom: 1rem;
+  }
+
+  textarea {
+    width: 100%;
+    background: var(--bg);
+    border: 1px solid var(--border);
+    border-radius: 8px;
+    color: var(--text);
+    font-family: 'DM Mono', monospace;
+    font-size: 0.78rem;
+    padding: 0.75rem;
+    resize: vertical;
+    min-height: 80px;
+    outline: none;
+    transition: border-color 0.2s;
+  }
+
+  textarea:focus { border-color: var(--accent); }
+  textarea::placeholder { color: var(--muted); }
+
+  .btn {
+    background: var(--accent);
+    color: white;
+    border: none;
+    border-radius: 8px;
+    padding: 0.6rem 1.25rem;
+    font-family: 'Space Grotesk', sans-serif;
+    font-weight: 700;
+    font-size: 0.85rem;
+    cursor: pointer;
+    transition: opacity 0.2s, transform 0.1s;
+    letter-spacing: 0.03em;
+    margin-top: 0.75rem;
+  }
+
+  .btn:hover { opacity: 0.85; }
+  .btn:active { transform: scale(0.98); }
+
+  .btn-ghost {
+    background: transparent;
+    border: 1px solid var(--border);
+    color: var(--muted);
+  }
+
+  .btn-ghost:hover { border-color: var(--accent); color: var(--accent); opacity: 1; }
+
+  .parse-feedback {
+    font-family: 'DM Mono', monospace;
+    font-size: 0.75rem;
+    margin-top: 0.5rem;
+    color: var(--green);
+    min-height: 1.2em;
+  }
+
+  .parse-feedback.error { color: var(--accent); }
+
+  .controls { display: flex; gap: 0.5rem; flex-wrap: wrap; margin-top: 0.75rem; }
+
+  /* PLAYER CONFIG */
+  .player-config {
+    display: flex;
+    gap: 0.5rem;
+    flex-wrap: wrap;
+    margin-bottom: 1rem;
+  }
+
+  .player-tag {
+    display: flex;
+    align-items: center;
+    gap: 0.4rem;
+    background: var(--bg);
+    border: 1px solid var(--border);
+    border-radius: 6px;
+    padding: 0.3rem 0.6rem;
+    font-family: 'DM Mono', monospace;
+    font-size: 0.75rem;
+    color: var(--text);
+  }
+
+  .player-tag .initial {
+    width: 20px; height: 20px;
+    border-radius: 50%;
+    display: flex; align-items: center; justify-content: center;
+    font-size: 0.65rem;
+    font-weight: 700;
+    background: var(--accent);
+    color: white;
+    flex-shrink: 0;
+  }
+
+  /* EMPTY STATE */
+  .empty { 
+    text-align: center; 
+    padding: 2rem; 
+    color: var(--muted);
+    font-family: 'DM Mono', monospace;
+    font-size: 0.8rem;
+  }
+</style>
+</head>
+<body>
+<div class="container">
+
+  <header>
+    <div>
+      <div class="logo">MAP<span>TAP</span></div>
+      <div class="subtitle">Group Leaderboard · 2026</div>
+    </div>
+  </header>
+
+  <!-- INPUT -->
+  <div class="input-section">
+    <div class="input-header">
+      <div class="section-title">📋 Paste Result from Teams</div>
+    </div>
+    <div class="player-config" id="playerConfig"></div>
+    <textarea id="resultInput" placeholder="www.maptap.gg March 12&#10;100🎯 90👑 85😁 99🎯 62🫢&#10;Final score: 843"></textarea>
+    <div class="controls">
+      <button class="btn" onclick="parseAndAdd()">+ Add Result</button>
+      <button class="btn btn-ghost" onclick="clearAll()">Clear All</button>
+    </div>
+    <div class="parse-feedback" id="feedback"></div>
+  </div>
+
+  <!-- LEADERBOARD CARDS -->
+  <div class="section-title">🏆 Standings by Points</div>
+  <div class="leaderboard" id="leaderboardPoints"></div>
+
+  <div class="section-title" style="margin-top:1.5rem">👑 Standings by Daily Wins</div>
+  <div class="leaderboard" id="leaderboardWins"></div>
+
+  <!-- DAILY TABLE -->
+  <div class="section-title">📅 Points by Date</div>
+  <div class="table-wrap">
+    <table>
+      <thead>
+        <tr>
+          <th>Date</th>
+          <th id="th0">—</th>
+          <th id="th1">—</th>
+          <th id="th2">—</th>
+          <th id="th3">—</th>
+        </tr>
+      </thead>
+      <tbody id="dailyBody"></tbody>
+    </table>
+  </div>
+
+</div>
+
+<script>
+// ── CONFIG ──────────────────────────────────────────────
+const PLAYERS = ['Jura', 'Adam', 'Berta', 'Andrew'];
+const INITIALS = ['JK', 'AP', 'BP', 'AH'];
+
+// ── STATE ───────────────────────────────────────────────
+let results = JSON.parse(localStorage.getItem('maptap_results_v2') || '[]');
+
+// Pre-load data from screenshot
+if (results.length === 0) {
+  results = [
+    { date: '12/03/26', scores: [950, 652, 843, 597], dropped: [false,false,false,false], didntPlay: [false,false,false,false] },
+    { date: '11/03/26', scores: [916, 950, 891, 955], dropped: [false,false,false,false], didntPlay: [false,false,false,false] },
+    { date: '10/03/26', scores: [886, 853, 914, 0],   dropped: [false,false,false,false], didntPlay: [false,false,false,false] },
+    { date: '09/03/26', scores: [893, 790, 853, 958], dropped: [false,false,false,false], didntPlay: [false,false,false,false] },
+    { date: '06/03/26', scores: [871, 908, 828, 922], dropped: [false,false,false,false], didntPlay: [false,false,false,false] },
+    { date: '05/03/26', scores: [967, 847, 824, 968], dropped: [false,false,false,false], didntPlay: [false,false,false,false] },
+    { date: '04/03/26', scores: [895, 952, 907, 952], dropped: [false,false,false,false], didntPlay: [false,false,false,false] },
+    { date: '03/03/26', scores: [907, 920, 940, 921], dropped: [false,false,false,false], didntPlay: [false,false,false,false] },
+  ];
+  save();
+}
+
+function getDayOfWeek(dateStr) {
+  // dateStr format: DD/MM/YY
+  const [d, m, y] = dateStr.split('/');
+  const date = new Date(`20${y}-${m}-${d}`);
+  return ['Sun','Mon','Tue','Wed','Thu','Fri','Sat'][date.getDay()];
+}
+
+function save() {
+  localStorage.setItem('maptap_results_v2', JSON.stringify(results));
+}
+
+// ── PARSE ───────────────────────────────────────────────
+function parseResult(text) {
+  // Extract date like "March 12" or "12 March"
+  const dateMatch = text.match(/(?:january|february|march|april|may|june|july|august|september|october|november|december)\s+(\d{1,2})|(\d{1,2})\s+(?:january|february|march|april|may|june|july|august|september|october|november|december)/i);
+  
+  // Extract final score
+  const scoreMatch = text.match(/final\s*score[:\s]*(\d+)/i);
+  
+  if (!scoreMatch) return null;
+  
+  const finalScore = parseInt(scoreMatch[1]);
+  
+  // Detect player from text — look for name mentions
+  let playerIdx = -1;
+  // Try to figure out date
+  let dateStr = '';
+  if (dateMatch) {
+    const months = ['jan','feb','mar','apr','may','jun','jul','aug','sep','oct','nov','dec'];
+    const fullMonths = ['january','february','march','april','may','june','july','august','september','october','november','december'];
+    const raw = dateMatch[0].toLowerCase();
+    let monthNum = -1;
+    fullMonths.forEach((m, i) => { if (raw.includes(m)) monthNum = i + 1; });
+    months.forEach((m, i) => { if (raw.includes(m) && monthNum === -1) monthNum = i + 1; });
+    const dayMatch = raw.match(/\d+/);
+    if (dayMatch && monthNum > 0) {
+      dateStr = `${String(dayMatch[0]).padStart(2,'0')}/${String(monthNum).padStart(2,'0')}/26`;
+    }
+  }
+
+  return { finalScore, dateStr };
+}
+
+function parseAndAdd() {
+  const text = document.getElementById('resultInput').value.trim();
+  const fb = document.getElementById('feedback');
+  
+  if (!text) {
+    fb.textContent = 'Paste a result first.';
+    fb.className = 'parse-feedback error';
+    return;
+  }
+
+  const parsed = parseResult(text);
+  if (!parsed || !parsed.finalScore) {
+    fb.textContent = '⚠ Could not parse score. Make sure "Final score: XXX" is included.';
+    fb.className = 'parse-feedback error';
+    return;
+  }
+
+  // Ask which player
+  const playerName = prompt(`Score parsed: ${parsed.finalScore}\nDate: ${parsed.dateStr || 'unknown'}\n\nWhich player?\n${PLAYERS.map((p,i) => `${i+1}. ${p}`).join('\n')}\n\nEnter number (1-4):`);
+  const pIdx = parseInt(playerName) - 1;
+  if (isNaN(pIdx) || pIdx < 0 || pIdx > 3) {
+    fb.textContent = '⚠ Invalid player selection.';
+    fb.className = 'parse-feedback error';
+    return;
+  }
+
+  const date = parsed.dateStr || prompt('Enter date (DD/MM/YY):');
+  
+  // Find existing row or create
+  let row = results.find(r => r.date === date);
+  if (!row) {
+    row = { date, scores: [null,null,null,null], dropped: [false,false,false,false], didntPlay: [true,true,true,true] };
+    results.push(row);
+    results.sort((a,b) => {
+      const pa = a.date.split('/').reverse().join('');
+      const pb = b.date.split('/').reverse().join('');
+      return pb.localeCompare(pa);
+    });
+  }
+  
+  row.scores[pIdx] = parsed.finalScore;
+  row.didntPlay[pIdx] = false;
+  recalcDropped();
+  save();
+  render();
+  
+  document.getElementById('resultInput').value = '';
+  fb.textContent = `✓ Added ${PLAYERS[pIdx]}: ${parsed.finalScore} on ${date}`;
+  fb.className = 'parse-feedback';
+}
+
+// ── RECALC ──────────────────────────────────────────────
+function recalcDropped() {
+  // No scores are dropped - count everything
+  results.forEach(r => r.dropped = [false, false, false, false]);
+}
+
+function getTotals() {
+  return PLAYERS.map((_, pi) => {
+    let total = 0, wins = 0;
+
+    results.forEach(r => {
+      // Only count scores that: player played (not X), score exists, and score wasn't dropped
+      if (!r.didntPlay[pi] && r.scores[pi] !== null && !r.dropped[pi]) {
+        total += r.scores[pi];
+      }
+    });
+
+    // Count daily wins — only among players who actually played that day
+    results.forEach(r => {
+      const playedScores = PLAYERS
+        .map((_, i) => ({ i, score: r.scores[i] }))
+        .filter(x => !r.didntPlay[x.i] && x.score !== null);
+
+      if (playedScores.length === 0) return;
+      const maxScore = Math.max(...playedScores.map(x => x.score));
+      if (!r.didntPlay[pi] && r.scores[pi] === maxScore) wins++;
+    });
+
+    return { total, wins };
+  });
+}
+
+// ── RENDER ──────────────────────────────────────────────
+function render() {
+  recalcDropped();
+  const totals = getTotals();
+
+  // Update table headers
+  PLAYERS.forEach((p, i) => {
+    document.getElementById(`th${i}`).textContent = p;
+  });
+
+  // Sort players by total points
+  const rankedByPoints = PLAYERS.map((p, i) => ({ name: p, idx: i, ...totals[i] }))
+    .sort((a,b) => b.total - a.total);
+
+  // Sort players by wins (tiebreak: total points)
+  const rankedByWins = PLAYERS.map((p, i) => ({ name: p, idx: i, ...totals[i] }))
+    .sort((a,b) => b.wins - a.wins || b.total - a.total);
+
+  function renderCards(ranked, highlightKey) {
+    return ranked.map((p, rank) => {
+      const medal = rank === 0 ? '🥇' : rank === 1 ? '🥈' : rank === 2 ? '🥉' : '';
+      const bigValue = highlightKey === 'wins' ? p.wins : p.total.toLocaleString();
+      const bigLabel = highlightKey === 'wins' ? 'Daily wins' : 'Total pts';
+      const subLabel = highlightKey === 'wins' ? 'Total pts' : 'Daily wins';
+      const subValue = highlightKey === 'wins' ? p.total.toLocaleString() : p.wins;
+      return `
+      <div class="player-card rank-${rank+1}">
+        <div class="rank-badge">${rank+1}</div>
+        <div class="player-name">${medal} ${p.name}</div>
+        <div class="player-stats">
+          <span class="stat-value big">${bigValue}</span>
+          <div class="stat-row"><span class="stat-label">${bigLabel}</span></div>
+          <div class="stat-row" style="margin-top:0.3rem">
+            <span class="stat-label">${subLabel}</span>
+            <span class="stat-value">${subValue}</span>
+          </div>
+          <div class="stat-row">
+            <span class="stat-label">Games played</span>
+            <span class="stat-value">${results.filter(r => !r.didntPlay[p.idx] && r.scores[p.idx] !== null).length}</span>
+          </div>
+        </div>
+      </div>`;
+    }).join('');
+  }
+
+  document.getElementById('leaderboardPoints').innerHTML = renderCards(rankedByPoints, 'points');
+  document.getElementById('leaderboardWins').innerHTML = renderCards(rankedByWins, 'wins');
+
+  // DAILY TABLE
+  const tbody = document.getElementById('dailyBody');
+  tbody.innerHTML = results.map(r => {
+    // Find daily winner — only among players who actually played
+    const playedToday = PLAYERS
+      .map((_, i) => ({ i, score: r.scores[i] }))
+      .filter(x => !r.didntPlay[x.i] && x.score !== null);
+    const maxScore = playedToday.length > 0 ? Math.max(...playedToday.map(x => x.score)) : -1;
+
+    const cells = PLAYERS.map((_, i) => {
+      if (r.didntPlay[i] || r.scores[i] === null) return `<td class="score-miss">—</td>`;
+      const isWin = r.scores[i] === maxScore;
+      const isDropped = r.dropped[i];
+      if (isDropped) return `<td class="score-dropped">${r.scores[i]}</td>`;
+      if (isWin) return `<td class="score-win">${r.scores[i]}</td>`;
+      return `<td>${r.scores[i]}</td>`;
+    }).join('');
+
+    return `<tr><td class="date-cell"><span class="day-label">${getDayOfWeek(r.date)}</span> ${r.date}</td>${cells}</tr>`;
+  }).join('');
+
+  if (results.length === 0) {
+    tbody.innerHTML = '<tr><td colspan="5" class="empty">No results yet. Paste one above!</td></tr>';
+  }
+}
+
+function clearAll() {
+  if (confirm('Clear all results?')) {
+    results = [];
+    save();
+    render();
+  }
+}
+
+// Render player tags
+document.getElementById('playerConfig').innerHTML = PLAYERS.map((p, i) =>
+  `<div class="player-tag"><div class="initial">${INITIALS[i]}</div>${p}</div>`
+).join('');
+
+render();
+</script>
+</body>
+</html>
