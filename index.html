@@ -245,6 +245,9 @@
   <div class="section-title" style="margin-top:0.5rem">🎯 Perfect 100s</div>
   <div class="round-stats-grid" id="roundPerfects"></div>
 
+  <div class="section-title" style="margin-top:0.5rem">📉 Worst Day</div>
+  <div class="leaderboard" id="worstDay"></div>
+
   <!-- DAILY TABLE -->
   <div class="section-title">📅 Results by Date</div>
   <div id="accordion"></div>
@@ -363,7 +366,10 @@ function computeStats(rows) {
     );
     const totalPerfects = perfectCounts.reduce((a,b) => a+b, 0);
 
-    return { player, totalFinal, gamesPlayed, wins, roundAvgs, perfectCounts, totalPerfects };
+    // Worst day
+    const worstDay = pRows.length ? pRows.reduce((min, r) => r.final < min.final ? r : min) : null;
+
+    return { player, totalFinal, gamesPlayed, wins, roundAvgs, perfectCounts, totalPerfects, worstDay };
   });
 }
 
@@ -455,6 +461,26 @@ function render(rows) {
           <span class="stat-label">Round ${i+1}</span>
           <span class="stat-value">${count > 0 ? `×${count} 🎯` : '—'}</span>
         </div>`).join('')}
+      </div>
+    </div>`;
+  }).join('');
+
+  // Worst Day — ordered worst first (lowest score first)
+  const byWorstDay = [...stats]
+    .filter(p => p.worstDay !== null)
+    .sort((a, b) => a.worstDay.final - b.worstDay.final);
+  document.getElementById('worstDay').innerHTML = byWorstDay.map((p, rank) => {
+    const medals = ['🤦','😬','😅','🙃'];
+    return `<div class="player-card rank-${rank+1}">
+      <div class="rank-badge">${rank+1}</div>
+      <div class="player-name">${medals[rank]} ${p.player}</div>
+      <div class="player-stats">
+        <span class="stat-value big" style="color:var(--accent)">${p.worstDay.final}</span>
+        <div class="stat-row"><span class="stat-label">Worst final score</span></div>
+        <div class="stat-row" style="margin-top:0.3rem">
+          <span class="stat-label">Date</span>
+          <span class="stat-value">${p.worstDay.date}</span>
+        </div>
       </div>
     </div>`;
   }).join('');
