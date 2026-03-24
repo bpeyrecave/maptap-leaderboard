@@ -271,9 +271,12 @@ let allRows = [];
 function hasScore(s) { return s !== null && s !== undefined && s !== '' && !isNaN(Number(s)) && Number(s) > 0; }
 function n(s) { return Number(s); }
 
+// FIX 1: Use local-time Date constructor to avoid UTC timezone offset shifting the day
 function getDayOfWeek(dateStr) {
-  const [d, m, y] = dateStr.split('/');
-  return ['Sun','Mon','Tue','Wed','Thu','Fri','Sat'][new Date(`20${y}-${m}-${d}`).getDay()];
+  const [d, m, y] = dateStr.split('/').map(Number);
+  const fullYear = y < 100 ? 2000 + y : y;
+  // new Date(year, monthIndex, day) uses LOCAL time — no UTC off-by-one
+  return ['Sun','Mon','Tue','Wed','Thu','Fri','Sat'][new Date(fullYear, m - 1, d).getDay()];
 }
 
 function setStatus(state, text) {
@@ -288,7 +291,9 @@ function avg(arr) {
 
 // ── FETCH ────────────────────────────────────
 async function fetchSheetData() {
-  const csvUrl = `https://docs.google.com/spreadsheets/d/${SHEET_ID}/export?format=csv&sheet=${encodeURIComponent(SHEET_NAME)}`;
+  // FIX 2: Append a cache-busting timestamp so proxies always fetch fresh data
+  const cacheBust = Date.now();
+  const csvUrl = `https://docs.google.com/spreadsheets/d/${SHEET_ID}/export?format=csv&sheet=${encodeURIComponent(SHEET_NAME)}&cb=${cacheBust}`;
   const proxies = [
     u => `https://corsproxy.io/?${encodeURIComponent(u)}`,
     u => `https://api.codetabs.com/v1/proxy?quest=${encodeURIComponent(u)}`,
