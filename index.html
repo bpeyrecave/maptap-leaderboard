@@ -17,6 +17,8 @@
     --text: #e8e8f0;
     --muted: #5a5a7a;
     --green: #00ff88;
+    --team-best: #00d4ff;
+    --team-worst: #ff6b35;
   }
 
   * { margin: 0; padding: 0; box-sizing: border-box; }
@@ -129,6 +131,148 @@
   .skeleton { background: linear-gradient(90deg, var(--surface) 25%, var(--border) 50%, var(--surface) 75%); background-size: 200% 100%; animation: shimmer 1.4s infinite; border-radius: 6px; height: 1rem; display: block; }
   @keyframes shimmer { 0% { background-position: 200% 0; } 100% { background-position: -200% 0; } }
 
+  /* ── TEAM PERFORMANCE ── */
+  .team-section {
+    margin-bottom: 2.5rem;
+  }
+
+  .team-grid {
+    display: grid;
+    grid-template-columns: 1fr 1fr;
+    gap: 0.75rem;
+  }
+
+  @media (max-width: 560px) {
+    .team-grid { grid-template-columns: 1fr; }
+  }
+
+  .team-card {
+    background: var(--surface);
+    border: 1px solid var(--border);
+    border-radius: 12px;
+    overflow: hidden;
+    transition: transform 0.2s, border-color 0.2s;
+  }
+  .team-card:hover { transform: translateY(-2px); }
+
+  .team-card-header {
+    padding: 0.85rem 1rem 0.65rem;
+    border-bottom: 1px solid var(--border);
+    display: flex;
+    align-items: center;
+    justify-content: space-between;
+    gap: 0.5rem;
+  }
+
+  .team-card-title {
+    font-family: 'DM Mono', monospace;
+    font-size: 0.68rem;
+    text-transform: uppercase;
+    letter-spacing: 0.12em;
+    color: var(--muted);
+  }
+
+  .team-card.best { border-color: rgba(0,212,255,0.35); }
+  .team-card.best .team-card-header { background: rgba(0,212,255,0.06); }
+  .team-card.best::before { content: ''; display: block; height: 2px; background: linear-gradient(90deg, transparent, var(--team-best), transparent); }
+
+  .team-card.worst { border-color: rgba(255,107,53,0.35); }
+  .team-card.worst .team-card-header { background: rgba(255,107,53,0.06); }
+  .team-card.worst::before { content: ''; display: block; height: 2px; background: linear-gradient(90deg, transparent, var(--team-worst), transparent); }
+
+  .team-avg-score {
+    font-family: 'Bebas Neue', sans-serif;
+    font-size: 2.6rem;
+    line-height: 1;
+  }
+  .team-card.best .team-avg-score { color: var(--team-best); }
+  .team-card.worst .team-avg-score { color: var(--team-worst); }
+
+  .team-threshold-badge {
+    font-family: 'DM Mono', monospace;
+    font-size: 0.64rem;
+    padding: 0.2rem 0.5rem;
+    border-radius: 20px;
+    font-weight: 500;
+    letter-spacing: 0.05em;
+    white-space: nowrap;
+  }
+  .team-card.best .team-threshold-badge {
+    background: rgba(0,212,255,0.12);
+    color: var(--team-best);
+    border: 1px solid rgba(0,212,255,0.25);
+  }
+  .team-card.worst .team-threshold-badge {
+    background: rgba(255,107,53,0.12);
+    color: var(--team-worst);
+    border: 1px solid rgba(255,107,53,0.25);
+  }
+
+  .team-card-body { padding: 0.9rem 1rem; }
+
+  .team-date-row {
+    display: flex;
+    align-items: center;
+    gap: 0.5rem;
+    margin-bottom: 0.75rem;
+    font-family: 'DM Mono', monospace;
+    font-size: 0.72rem;
+    color: var(--muted);
+  }
+
+  .team-scores {
+    display: flex;
+    flex-direction: column;
+    gap: 0.3rem;
+  }
+
+  .team-score-row {
+    display: flex;
+    align-items: center;
+    justify-content: space-between;
+    font-family: 'DM Mono', monospace;
+    font-size: 0.75rem;
+  }
+
+  .team-score-player { color: var(--text); font-weight: 600; }
+  .team-score-val { font-weight: 500; }
+  .team-card.best .team-score-val { color: var(--team-best); }
+  .team-card.worst .team-score-val { color: var(--team-worst); }
+  .team-score-miss { color: var(--muted); }
+
+  /* ── GOOD DAYS SUMMARY ── */
+  .good-days-row {
+    display: flex;
+    align-items: center;
+    gap: 0.75rem;
+    margin-top: 0.75rem;
+    padding-top: 0.75rem;
+    border-top: 1px solid var(--border);
+    font-family: 'DM Mono', monospace;
+    font-size: 0.72rem;
+    color: var(--muted);
+    flex-wrap: wrap;
+  }
+
+  .good-days-count {
+    font-family: 'Bebas Neue', sans-serif;
+    font-size: 1.5rem;
+    color: var(--team-best);
+    line-height: 1;
+  }
+
+  .good-days-label { color: var(--muted); }
+
+  .good-days-pct {
+    margin-left: auto;
+    background: rgba(0,212,255,0.08);
+    border: 1px solid rgba(0,212,255,0.2);
+    color: var(--team-best);
+    border-radius: 6px;
+    padding: 0.2rem 0.5rem;
+    font-size: 0.68rem;
+  }
+
   /* ── NESTED ACCORDION ── */
   .acc-year { margin-bottom: 0.75rem; }
 
@@ -197,6 +341,17 @@
 
   .empty { text-align: center; padding: 2rem; color: var(--muted); font-family: 'DM Mono', monospace; font-size: 0.8rem; }
 
+  .fired-up-badge {
+    display: inline-flex; align-items: center; gap: 0.3rem;
+    font-family: 'DM Mono', monospace; font-size: 0.62rem;
+    font-weight: 600; letter-spacing: 0.06em;
+    background: rgba(255, 160, 0, 0.12);
+    border: 1px solid rgba(255, 160, 0, 0.35);
+    color: #ffaa00;
+    border-radius: 20px; padding: 0.18rem 0.55rem;
+    white-space: nowrap;
+  }
+
   .tabs { display: flex; gap: 0.5rem; margin-bottom: 0.75rem; }
   .tab { font-family: 'DM Mono', monospace; font-size: 0.7rem; text-transform: uppercase; letter-spacing: 0.1em; padding: 0.35rem 0.75rem; border-radius: 6px; border: 1px solid var(--border); color: var(--muted); cursor: pointer; background: transparent; transition: all 0.2s; }
   .tab.active { background: rgba(255,60,60,0.1); border-color: var(--accent); color: var(--accent); }
@@ -251,6 +406,10 @@
   <div class="section-title" style="margin-top:0.5rem">📉 Worst Day</div>
   <div class="leaderboard" id="worstDay"></div>
 
+  <!-- TEAM PERFORMANCE -->
+  <div class="section-title" style="margin-top:0.5rem">🤝 Team Performance</div>
+  <div class="team-section" id="teamPerformance"></div>
+
   <!-- DAILY TABLE -->
   <div class="section-title">📅 Results by Date</div>
   <div id="accordion"></div>
@@ -261,6 +420,7 @@
 // ═══════════════════════════════════════════
 const SHEET_ID   = '1YOh6ah35-qDKM3p5CnT7jbeyMIY637-WDXF0_xVPKE4';
 const SHEET_NAME = 'Sheet1';
+const TEAM_GOOD_DAY_THRESHOLD = 900; // individual score out of 1000
 // ═══════════════════════════════════════════
 
 const PLAYERS = ['Jura', 'Adam', 'Berta', 'Andrew'];
@@ -271,11 +431,9 @@ let allRows = [];
 function hasScore(s) { return s !== null && s !== undefined && s !== '' && !isNaN(Number(s)) && Number(s) > 0; }
 function n(s) { return Number(s); }
 
-// FIX 1: Use local-time Date constructor to avoid UTC timezone offset shifting the day
 function getDayOfWeek(dateStr) {
   const [d, m, y] = dateStr.split('/').map(Number);
   const fullYear = y < 100 ? 2000 + y : y;
-  // new Date(year, monthIndex, day) uses LOCAL time — no UTC off-by-one
   return ['Sun','Mon','Tue','Wed','Thu','Fri','Sat'][new Date(fullYear, m - 1, d).getDay()];
 }
 
@@ -291,7 +449,6 @@ function avg(arr) {
 
 // ── FETCH ────────────────────────────────────
 async function fetchSheetData() {
-  // FIX 2: Append a cache-busting timestamp so proxies always fetch fresh data
   const cacheBust = Date.now();
   const csvUrl = `https://docs.google.com/spreadsheets/d/${SHEET_ID}/export?format=csv&sheet=${encodeURIComponent(SHEET_NAME)}&cb=${cacheBust}`;
   const proxies = [
@@ -316,7 +473,6 @@ async function fetchSheetData() {
 }
 
 // ── PARSE CSV ────────────────────────────────
-// Expected columns: Date, Player, R1, R2, R3, R4, R5, Final
 function parseCSV(text) {
   const lines = text.trim().split('\n').map(l => {
     const cols = []; let cur = '', inQ = false;
@@ -344,6 +500,120 @@ function parseCSV(text) {
     });
 }
 
+// ── COMPUTE TEAM STATS ───────────────────────
+function computeTeamStats(rows) {
+  const allDates = [...new Set(rows.map(r => r.date))];
+
+  // For each date, compute the average final across all players who played
+  const dayAverages = allDates
+    .map(date => {
+      const dayRows = rows.filter(r => r.date === date && hasScore(r.final));
+      if (!dayRows.length) return null;
+      const teamAvg = dayRows.reduce((s, r) => s + r.final, 0) / dayRows.length;
+      return { date, teamAvg: Math.round(teamAvg * 10) / 10, rows: dayRows, playerCount: dayRows.length };
+    })
+    .filter(Boolean);
+
+  if (!dayAverages.length) return null;
+
+  // Best & worst team days
+  const bestTeamDay  = dayAverages.reduce((best, d) => d.teamAvg > best.teamAvg ? d : best);
+  const worstTeamDay = dayAverages.reduce((worst, d) => d.teamAvg < worst.teamAvg ? d : worst);
+
+  // Days at or above threshold (avg, kept for worst-day rough count)
+  const goodDays = dayAverages.filter(d => d.teamAvg >= TEAM_GOOD_DAY_THRESHOLD);
+
+  // Days where all 4 players each individually scored 900+
+  const allHitDays = allDates
+    .map(date => {
+      const dayRows = rows.filter(r => r.date === date && hasScore(r.final));
+      if (dayRows.length < PLAYERS.length) return null; // not everyone played
+      const allHit = dayRows.every(r => r.final >= TEAM_GOOD_DAY_THRESHOLD);
+      return allHit ? date : null;
+    })
+    .filter(Boolean);
+
+  // Days where all 4 players each individually scored less than 900
+  const allMissedDays = allDates
+    .map(date => {
+      const dayRows = rows.filter(r => r.date === date && hasScore(r.final));
+      if (dayRows.length < PLAYERS.length) return null;
+      const allMissed = dayRows.every(r => r.final < TEAM_GOOD_DAY_THRESHOLD);
+      return allMissed ? date : null;
+    })
+    .filter(Boolean);
+
+  return { bestTeamDay, worstTeamDay, goodDays, allHitDays, allMissedDays, totalDays: dayAverages.length };
+}
+
+// ── RENDER TEAM PERFORMANCE ──────────────────
+function renderTeamPerformance(rows) {
+  const el = document.getElementById('teamPerformance');
+  const stats = computeTeamStats(rows);
+
+  if (!stats) {
+    el.innerHTML = '<div class="empty">No team data yet.</div>';
+    return [];
+  }
+
+  const { bestTeamDay, worstTeamDay, goodDays, allHitDays, allMissedDays, totalDays } = stats;
+  const goodDayPct = totalDays > 0 ? Math.round((goodDays.length / totalDays) * 100) : 0;
+
+  function scoreRows(day, cardType) {
+    return PLAYERS.map(p => {
+      const pr = day.rows.find(r => r.player === p);
+      if (!pr) return `<div class="team-score-row"><span class="team-score-player">${p}</span><span class="team-score-miss">—</span></div>`;
+      return `<div class="team-score-row"><span class="team-score-player">${p}</span><span class="team-score-val">${pr.final}</span></div>`;
+    }).join('');
+  }
+
+  el.innerHTML = `
+    <div class="team-grid">
+      <div class="team-card best">
+        <div class="team-card-header">
+          <span class="team-card-title">🌤 Best team day</span>
+          <span class="team-threshold-badge">all 4 score ≥ 900 = good day</span>
+        </div>
+        <div class="team-card-body">
+          <div class="team-avg-score">${Math.round(bestTeamDay.teamAvg)}</div>
+          <div class="team-date-row">
+            <span class="day-label">${getDayOfWeek(bestTeamDay.date)}</span>
+            <span>${bestTeamDay.date}</span>
+            <span style="margin-left:auto;font-size:0.65rem">team avg</span>
+          </div>
+          <div class="team-scores">${scoreRows(bestTeamDay, 'best')}</div>
+          <div class="good-days-row">
+            <span class="good-days-count">${allHitDays.length}</span>
+            <span class="good-days-label">day${allHitDays.length !== 1 ? 's' : ''} all 4 scored 900+</span>
+          </div>
+        </div>
+      </div>
+
+      <div class="team-card worst">
+        <div class="team-card-header">
+          <span class="team-card-title">⛈ Worst team day</span>
+          <span class="team-threshold-badge">not all 4 hit 900 = rough day</span>
+        </div>
+        <div class="team-card-body">
+          <div class="team-avg-score">${Math.round(worstTeamDay.teamAvg)}</div>
+          <div class="team-date-row">
+            <span class="day-label">${getDayOfWeek(worstTeamDay.date)}</span>
+            <span>${worstTeamDay.date}</span>
+            <span style="margin-left:auto;font-size:0.65rem">team avg</span>
+          </div>
+          <div class="team-scores">${scoreRows(worstTeamDay, 'worst')}</div>
+          <div class="good-days-row" style="border-top-color:var(--border)">
+            <span class="good-days-count" style="color:var(--team-worst)">${allMissedDays.length}</span>
+            <span class="good-days-label">day${allMissedDays.length !== 1 ? 's' : ''} all 4 scored under 900</span>
+          </div>
+        </div>
+      </div>
+    </div>
+  `;
+
+  return allHitDays;
+}
+
 // ── COMPUTE STATS ────────────────────────────
 function computeStats(rows) {
   return PLAYERS.map(player => {
@@ -352,7 +622,6 @@ function computeStats(rows) {
     const totalFinal = pRows.reduce((s, r) => s + r.final, 0);
     const gamesPlayed = pRows.length;
 
-    // Daily wins — compare finals on same date
     const dates = [...new Set(rows.map(r => r.date))];
     let wins = 0;
     dates.forEach(date => {
@@ -362,23 +631,18 @@ function computeStats(rows) {
       if (day.find(r => r.player === player && r.final === max)) wins++;
     });
 
-    // Round averages (only rows that have round data)
     const roundAvgs = [0,1,2,3,4].map(i => {
       const vals = pRows.map(r => r.rounds[i]).filter(v => hasScore(v));
       return vals.length ? Math.round(vals.reduce((a,b) => a+b,0) / vals.length) : null;
     });
 
-    // Perfect 100s per round
     const perfectCounts = [0,1,2,3,4].map(i =>
       pRows.filter(r => r.rounds[i] === 100).length
     );
     const totalPerfects = perfectCounts.reduce((a,b) => a+b, 0);
 
-    // Worst day
     const worstDay = pRows.length ? pRows.reduce((min, r) => r.final < min.final ? r : min) : null;
-
-    // Best day
-    const bestDay = pRows.length ? pRows.reduce((max, r) => r.final > max.final ? r : max) : null;
+    const bestDay  = pRows.length ? pRows.reduce((max, r) => r.final > max.final ? r : max) : null;
 
     return { player, totalFinal, gamesPlayed, wins, roundAvgs, perfectCounts, totalPerfects, worstDay, bestDay };
   });
@@ -388,7 +652,6 @@ function computeStats(rows) {
 function render(rows) {
   const stats = computeStats(rows);
 
-  // Standings by points
   const byPoints = [...stats].sort((a,b) => b.totalFinal - a.totalFinal);
   const byWins   = [...stats].sort((a,b) => b.wins - a.wins || b.totalFinal - a.totalFinal);
 
@@ -420,7 +683,6 @@ function render(rows) {
   document.getElementById('leaderboardPoints').innerHTML = renderCards(byPoints, 'points');
   document.getElementById('leaderboardWins').innerHTML   = renderCards(byWins,   'wins');
 
-  // Round averages cards — sorted by point average, with rank badges
   const maxAvg = 100;
   const byAvg = [...stats].sort((a, b) => {
     const avgA = a.gamesPlayed ? a.totalFinal / a.gamesPlayed : 0;
@@ -430,9 +692,7 @@ function render(rows) {
   document.getElementById('roundAvgs').innerHTML = byAvg.map((p, rank) => {
     const medal = ['🥇','🥈','🥉',''][rank];
     const hasRoundData = p.roundAvgs.some(v => v !== null);
-    const overallAvg = p.gamesPlayed
-      ? Math.round(p.totalFinal / p.gamesPlayed)
-      : null;
+    const overallAvg = p.gamesPlayed ? Math.round(p.totalFinal / p.gamesPlayed) : null;
 
     const roundRows = hasRoundData
       ? [0,1,2,3,4].map(i => {
@@ -458,7 +718,6 @@ function render(rows) {
     </div>`;
   }).join('');
 
-  // Perfect 100s — just total count, styled like standings cards
   const byPerfects = [...stats].sort((a,b) => b.totalPerfects - a.totalPerfects);
   document.getElementById('roundPerfects').innerHTML = byPerfects.map((p, rank) => {
     const medal = ['🥇','🥈','🥉',''][rank];
@@ -476,7 +735,6 @@ function render(rows) {
     </div>`;
   }).join('');
 
-  // Best Day — ordered best first (highest score first)
   const byBestDay = [...stats]
     .filter(p => p.bestDay !== null)
     .sort((a, b) => b.bestDay.final - a.bestDay.final);
@@ -496,7 +754,6 @@ function render(rows) {
     </div>`;
   }).join('');
 
-  // Worst Day — ordered worst first (lowest score first)
   const byWorstDay = [...stats]
     .filter(p => p.worstDay !== null)
     .sort((a, b) => a.worstDay.final - b.worstDay.final);
@@ -516,19 +773,20 @@ function render(rows) {
     </div>`;
   }).join('');
 
-  // Build nested year → month → day accordion
+  // Team performance
+  const allHitDays = renderTeamPerformance(rows);
+
   allRows = rows;
-  renderAccordion(rows);
+  renderAccordion(rows, allHitDays);
 }
 
-function renderAccordion(rows) {
+function renderAccordion(rows, allHitDays = []) {
   const accordion = document.getElementById('accordion');
   accordion.className = 'accordion';
   if (!rows.length) { accordion.innerHTML = '<div class="empty">No data yet.</div>'; return; }
 
   const MONTH_NAMES = ['January','February','March','April','May','June','July','August','September','October','November','December'];
 
-  // Compute all date winners upfront
   const dateWinners = {}, dateWinnerNames = {};
   const allDates = [...new Set(rows.map(r => r.date))];
   allDates.forEach(date => {
@@ -539,7 +797,6 @@ function renderAccordion(rows) {
     dateWinnerNames[date] = day.find(r => r.final === max)?.player;
   });
 
-  // Group: year → month → dates
   const tree = {};
   rows.forEach(r => {
     const [d, m, y] = r.date.split('/');
@@ -586,10 +843,15 @@ function renderAccordion(rows) {
           </tr>`;
         }).join('');
 
+        const isFiredUp = allHitDays.includes(date);
+        const perfectCount = dayRows.reduce((sum, r) => sum + r.rounds.filter(v => v === 100).length, 0);
+
         return `<div class="acc-item" onclick="this.classList.toggle('open')">
           <div class="acc-header">
             <div class="acc-header-left">
               <span class="date-cell"><span class="day-label">${getDayOfWeek(date)}</span>${date}</span>
+              ${isFiredUp ? `<span class="fired-up-badge">🔥 All scored +900</span>` : ''}
+              ${perfectCount > 0 ? `<span class="fired-up-badge" style="background:rgba(255,215,0,0.1);border-color:rgba(255,215,0,0.3);color:var(--gold)">💯×${perfectCount}</span>` : ''}
             </div>
             <div class="acc-header-right">
               ${winnerName ? `<span class="acc-winner">
