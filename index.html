@@ -352,6 +352,24 @@
     white-space: nowrap;
   }
 
+  .qualifying-footnote {
+    font-family: 'DM Mono', monospace; font-size: 0.65rem;
+    color: var(--muted); margin: -0.5rem 0 1.25rem;
+  }
+
+  .not-qualifying-badge {
+    display: inline-flex; align-items: center; gap: 0.3rem;
+    font-family: 'DM Mono', monospace; font-size: 0.62rem;
+    font-weight: 600; letter-spacing: 0.06em;
+    background: rgba(255, 60, 60, 0.12);
+    border: 1px solid rgba(255, 60, 60, 0.35);
+    color: var(--accent);
+    border-radius: 20px; padding: 0.18rem 0.55rem;
+    white-space: nowrap;
+  }
+
+  .date-cell.not-qualifying { color: var(--accent); }
+
   .tabs { display: flex; gap: 0.5rem; margin-bottom: 0.75rem; }
   .tab { font-family: 'DM Mono', monospace; font-size: 0.7rem; text-transform: uppercase; letter-spacing: 0.1em; padding: 0.35rem 0.75rem; border-radius: 6px; border: 1px solid var(--border); color: var(--muted); cursor: pointer; background: transparent; transition: all 0.2s; }
   .tab.active { background: rgba(255,60,60,0.1); border-color: var(--accent); color: var(--accent); }
@@ -384,6 +402,7 @@
     <div class="player-card"><span class="skeleton" style="width:60%;margin-bottom:0.75rem"></span><span class="skeleton" style="width:40%;height:2rem"></span></div>
     <div class="player-card"><span class="skeleton" style="width:60%;margin-bottom:0.75rem"></span><span class="skeleton" style="width:40%;height:2rem"></span></div>
   </div>
+  <div class="qualifying-footnote">*Qualifying days are weekdays where all players participated.</div>
 
   <div class="section-title" style="margin-top:0.5rem">👑 Standings by Daily Wins</div>
   <div class="leaderboard" id="leaderboardWins">
@@ -435,6 +454,25 @@ function getDayOfWeek(dateStr) {
   const [d, m, y] = dateStr.split('/').map(Number);
   const fullYear = y < 100 ? 2000 + y : y;
   return ['Sun','Mon','Tue','Wed','Thu','Fri','Sat'][new Date(fullYear, m - 1, d).getDay()];
+}
+
+function isWeekday(dateStr) {
+  const dow = getDayOfWeek(dateStr);
+  return dow !== 'Sat' && dow !== 'Sun';
+}
+
+// A day qualifies for "Total qualifying pts" when it falls on a weekday AND
+// every player has a recorded score for it.
+function getQualifyingDates(rows) {
+  const allDates = [...new Set(rows.map(r => r.date))];
+  const qualifying = new Set();
+  allDates.forEach(date => {
+    if (!isWeekday(date)) return;
+    const dayRows = rows.filter(r => r.date === date);
+    const allPlayed = PLAYERS.every(p => dayRows.some(r => r.player === p && hasScore(r.final)));
+    if (allPlayed) qualifying.add(date);
+  });
+  return qualifying;
 }
 
 function setStatus(state, text) {
@@ -620,11 +658,14 @@ function renderTeamPerformance(rows) {
 }
 
 // ── COMPUTE STATS ────────────────────────────
-function computeStats(rows) {
+function computeStats(rows, qualifyingDates) {
   return PLAYERS.map(player => {
     const pRows = rows.filter(r => r.player === player && hasScore(r.final));
 
     const totalFinal = pRows.reduce((s, r) => s + r.final, 0);
+    const qualifyingTotal = pRows
+      .filter(r => qualifyingDates.has(r.date))
+      .reduce((s, r) => s + r.final, 0);
     const gamesPlayed = pRows.length;
 
     const dates = [...new Set(rows.map(r => r.date))];
@@ -649,44 +690,69 @@ function computeStats(rows) {
     const worstDay = pRows.length ? pRows.reduce((min, r) => r.final < min.final ? r : min) : null;
     const bestDay  = pRows.length ? pRows.reduce((max, r) => r.final > max.final ? r : max) : null;
 
-    return { player, totalFinal, gamesPlayed, wins, roundAvgs, perfectCounts, totalPerfects, worstDay, bestDay };
+    return { player, totalFinal, qualifyingTotal, gamesPlayed, wins, roundAvgs, perfectCounts, totalPerfects, worstDay, bestDay };
   });
 }
 
 // ── RENDER ───────────────────────────────────
 function render(rows) {
-  const stats = computeStats(rows);
+  const qualifyingDates = getQualifyingDates(rows);
+  const stats = computeStats(rows, qualifyingDates);
 
-  const byPoints = [...stats].sort((a,b) => b.totalFinal - a.totalFinal);
+  const byPoints = [...stats].sort((a,b) => b.qualifyingTotal - a.qualifyingTotal);
   const byWins   = [...stats].sort((a,b) => b.wins - a.wins || b.totalFinal - a.totalFinal);
 
-  function renderCards(ranked, key) {
+  function renderPointsCards(ranked) {
     return ranked.map((p, rank) => {
       const medal = ['🥇','🥈','🥉',''][rank];
-      const big   = key === 'wins' ? p.wins : p.totalFinal.toLocaleString();
-      const label = key === 'wins' ? 'Daily wins' : 'Total pts';
-      const winRate = p.gamesPlayed > 0 ? Math.round((p.wins / p.gamesPlayed) * 100) : 0;
       return `<div class="player-card rank-${rank+1}">
         <div class="rank-badge">${rank+1}</div>
         <div class="player-name">${medal} ${p.player}</div>
         <div class="player-stats">
-          <span class="stat-value big">${big}</span>
-          <div class="stat-row"><span class="stat-label">${label}</span></div>
+          <span class="stat-value big">${p.qualifyingTotal.toLocaleString()}</span>
+          <div class="stat-row"><span class="stat-label">Total qualifying pts</span></div>
           <div class="stat-row" style="margin-top:0.3rem">
-            <span class="stat-label">Games played</span>
+            <span class="stat-label">Total qualifying days</span>
+            <span class="stat-value">${qualifyingDates.size}</span>
+          </div>
+          <div class="stat-row">
+            <span class="stat-label">Total points</span>
+            <span class="stat-value">${p.totalFinal.toLocaleString()}</span>
+          </div>
+          <div class="stat-row">
+            <span class="stat-label">Total games played</span>
             <span class="stat-value">${p.gamesPlayed}</span>
           </div>
-          ${key === 'wins' ? `<div class="stat-row">
-            <span class="stat-label">Win rate</span>
-            <span class="stat-value">${winRate}%</span>
-          </div>` : ''}
         </div>
       </div>`;
     }).join('');
   }
 
-  document.getElementById('leaderboardPoints').innerHTML = renderCards(byPoints, 'points');
-  document.getElementById('leaderboardWins').innerHTML   = renderCards(byWins,   'wins');
+  function renderWinsCards(ranked) {
+    return ranked.map((p, rank) => {
+      const medal = ['🥇','🥈','🥉',''][rank];
+      const winRate = p.gamesPlayed > 0 ? Math.round((p.wins / p.gamesPlayed) * 100) : 0;
+      return `<div class="player-card rank-${rank+1}">
+        <div class="rank-badge">${rank+1}</div>
+        <div class="player-name">${medal} ${p.player}</div>
+        <div class="player-stats">
+          <span class="stat-value big">${p.wins}</span>
+          <div class="stat-row"><span class="stat-label">Daily wins</span></div>
+          <div class="stat-row" style="margin-top:0.3rem">
+            <span class="stat-label">Games played</span>
+            <span class="stat-value">${p.gamesPlayed}</span>
+          </div>
+          <div class="stat-row">
+            <span class="stat-label">Win rate</span>
+            <span class="stat-value">${winRate}%</span>
+          </div>
+        </div>
+      </div>`;
+    }).join('');
+  }
+
+  document.getElementById('leaderboardPoints').innerHTML = renderPointsCards(byPoints);
+  document.getElementById('leaderboardWins').innerHTML   = renderWinsCards(byWins);
 
   const maxAvg = 100;
   const byAvg = [...stats].sort((a, b) => {
@@ -782,10 +848,10 @@ function render(rows) {
   const allHitDays = renderTeamPerformance(rows);
 
   allRows = rows;
-  renderAccordion(rows, allHitDays);
+  renderAccordion(rows, allHitDays, qualifyingDates);
 }
 
-function renderAccordion(rows, allHitDays = []) {
+function renderAccordion(rows, allHitDays = [], qualifyingDates = new Set()) {
   const accordion = document.getElementById('accordion');
   accordion.className = 'accordion';
   if (!rows.length) { accordion.innerHTML = '<div class="empty">No data yet.</div>'; return; }
@@ -850,11 +916,14 @@ function renderAccordion(rows, allHitDays = []) {
 
         const isFiredUp = allHitDays.includes(date);
         const perfectCount = dayRows.reduce((sum, r) => sum + r.rounds.filter(v => v === 100).length, 0);
+        const notQualifying = !qualifyingDates.has(date);
+        const notQualifyingReason = !isWeekday(date) ? 'Weekend' : 'Not all participated';
 
         return `<div class="acc-item" onclick="this.classList.toggle('open')">
           <div class="acc-header">
             <div class="acc-header-left">
-              <span class="date-cell"><span class="day-label">${getDayOfWeek(date)}</span>${date}</span>
+              <span class="date-cell${notQualifying ? ' not-qualifying' : ''}"><span class="day-label">${getDayOfWeek(date)}</span>${date}</span>
+              ${notQualifying ? `<span class="not-qualifying-badge">${notQualifyingReason}</span>` : ''}
               ${isFiredUp ? `<span class="fired-up-badge">🔥 All scored +900</span>` : ''}
               ${perfectCount > 0 ? `<span class="fired-up-badge" style="background:rgba(255,215,0,0.1);border-color:rgba(255,215,0,0.3);color:var(--gold)">💯×${perfectCount}</span>` : ''}
             </div>
