@@ -715,11 +715,9 @@ function render(rows) {
             <span class="stat-label">Total qualifying days</span>
             <span class="stat-value">${qualifyingDates.size}</span>
           </div>
-          <div class="stat-row">
-            <span class="stat-label">Total points</span>
-            <span class="stat-value">${p.totalFinal.toLocaleString()}</span>
-          </div>
-          <div class="stat-row">
+          <span class="stat-value big" style="color:#fff;margin-top:0.75rem">${p.totalFinal.toLocaleString()}</span>
+          <div class="stat-row"><span class="stat-label">Total points</span></div>
+          <div class="stat-row" style="margin-top:0.3rem">
             <span class="stat-label">Total games played</span>
             <span class="stat-value">${p.gamesPlayed}</span>
           </div>
