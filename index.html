@@ -451,23 +451,28 @@ function avg(arr) {
 async function fetchSheetData() {
   const cacheBust = Date.now();
   const csvUrl = `https://docs.google.com/spreadsheets/d/${SHEET_ID}/export?format=csv&sheet=${encodeURIComponent(SHEET_NAME)}&cb=${cacheBust}`;
-  const proxies = [
+  // Google's export endpoint allows a direct cross-origin read for a publicly
+  // shared sheet, so try that first — it's faster and doesn't depend on any
+  // third-party service. The public CORS proxies are kept only as a fallback
+  // in case a browser/network blocks the direct request.
+  const attempts = [
+    u => u,
     u => `https://corsproxy.io/?${encodeURIComponent(u)}`,
     u => `https://api.codetabs.com/v1/proxy?quest=${encodeURIComponent(u)}`,
     u => `https://api.allorigins.win/get?url=${encodeURIComponent(u)}`,
   ];
 
   let lastErr;
-  for (const makeProxy of proxies) {
+  for (const makeUrl of attempts) {
     try {
-      const res = await fetch(makeProxy(csvUrl), { signal: AbortSignal.timeout(8000) });
+      const res = await fetch(makeUrl(csvUrl), { signal: AbortSignal.timeout(8000) });
       if (!res.ok) throw new Error(`HTTP ${res.status}`);
       const text = res.headers.get('content-type')?.includes('json')
         ? (await res.json()).contents
         : await res.text();
       if (!text || text.includes('<!DOCTYPE')) throw new Error('Sheet not public');
       return parseCSV(text);
-    } catch(e) { lastErr = e; console.warn('Proxy failed:', e.message); }
+    } catch(e) { lastErr = e; console.warn('Fetch attempt failed:', e.message); }
   }
   throw lastErr;
 }
